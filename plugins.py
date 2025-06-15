@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-插件系统
-提供可扩展的下载前后处理机制
+Plugin System
+Provides extensible pre and post download processing mechanisms
 """
 
 import json
@@ -17,7 +17,7 @@ from logger import LoggerMixin
 from config import Config
 
 class DownloadPlugin(ABC):
-    """下载插件基类"""
+    """Base class for download plugins"""
     
     def __init__(self, name: str):
         self.name = name
@@ -25,37 +25,37 @@ class DownloadPlugin(ABC):
     
     @abstractmethod
     def pre_download(self, paper: Paper) -> bool:
-        """下载前处理
+        """Pre-download processing
         
         Args:
-            paper: 论文对象
+            paper: Paper object
         
         Returns:
-            True继续下载，False跳过下载
+            True to continue download, False to skip download
         """
         pass
     
     @abstractmethod
     def post_download(self, paper: Paper, filepath: Path, success: bool) -> None:
-        """下载后处理
+        """Post-download processing
         
         Args:
-            paper: 论文对象
-            filepath: 下载的文件路径
-            success: 下载是否成功
+            paper: Paper object
+            filepath: Downloaded file path
+            success: Whether download was successful
         """
         pass
     
     def enable(self):
-        """启用插件"""
+        """Enable plugin"""
         self.enabled = True
     
     def disable(self):
-        """禁用插件"""
+        """Disable plugin"""
         self.enabled = False
 
 class DuplicateCheckPlugin(DownloadPlugin, LoggerMixin):
-    """重复检查插件"""
+    """Duplicate check plugin"""
     
     def __init__(self, download_dir: Optional[Path] = None):
         super().__init__("duplicate_check")
@@ -65,48 +65,48 @@ class DuplicateCheckPlugin(DownloadPlugin, LoggerMixin):
         self._load_existing_papers()
     
     def _load_existing_papers(self):
-        """加载已存在的论文"""
+        """Load existing papers"""
         if not self.download_dir.exists():
             return
         
         for pdf_file in self.download_dir.glob("*.pdf"):
-            # 从文件名提取论文ID
+            # Extract paper ID from filename
             filename = pdf_file.stem
             if '_' in filename:
                 paper_id = filename.split('_')[0]
                 self.downloaded_papers.add(paper_id)
         
-        self.log_info(f"加载了 {len(self.downloaded_papers)} 个已下载论文")
+        self.log_info(f"Loaded {len(self.downloaded_papers)} downloaded papers")
     
     def _calculate_paper_hash(self, paper: Paper) -> str:
-        """计算论文内容哈希"""
+        """Calculate paper content hash"""
         content = f"{paper.title}_{paper.abstract}_{','.join(paper.authors)}"
         return hashlib.md5(content.encode()).hexdigest()
     
     def pre_download(self, paper: Paper) -> bool:
-        """检查是否为重复论文"""
-        # 检查ID重复
+        """Check if paper is duplicate"""
+        # Check ID duplication
         if paper.id in self.downloaded_papers:
-            self.log_info(f"论文ID重复，跳过下载: {paper.id}")
+            self.log_info(f"Paper ID duplicate, skipping download: {paper.id}")
             return False
         
-        # 检查内容重复
+        # Check content duplication
         paper_hash = self._calculate_paper_hash(paper)
         if paper_hash in self.paper_hashes.values():
-            self.log_info(f"论文内容重复，跳过下载: {paper.id}")
+            self.log_info(f"Paper content duplicate, skipping download: {paper.id}")
             return False
         
         self.paper_hashes[paper.id] = paper_hash
         return True
     
     def post_download(self, paper: Paper, filepath: Path, success: bool) -> None:
-        """记录下载的论文"""
+        """Record downloaded paper"""
         if success:
             self.downloaded_papers.add(paper.id)
-            self.log_info(f"记录已下载论文: {paper.id}")
+            self.log_info(f"Recorded downloaded paper: {paper.id}")
 
 class CategoryFilterPlugin(DownloadPlugin, LoggerMixin):
-    """分类过滤插件"""
+    """Category filter plugin"""
     
     def __init__(self, allowed_categories: List[str] = None, 
                  blocked_categories: List[str] = None):
@@ -115,27 +115,27 @@ class CategoryFilterPlugin(DownloadPlugin, LoggerMixin):
         self.blocked_categories = set(blocked_categories or [])
     
     def pre_download(self, paper: Paper) -> bool:
-        """根据分类过滤论文"""
+        """Filter papers by category"""
         paper_categories = set(paper.categories)
         
-        # 检查是否包含被阻止的分类
+        # Check if contains blocked categories
         if self.blocked_categories and paper_categories & self.blocked_categories:
-            self.log_info(f"论文包含被阻止的分类，跳过下载: {paper.id}")
+            self.log_info(f"Paper contains blocked category, skipping download: {paper.id}")
             return False
         
-        # 检查是否包含允许的分类
+        # Check if contains allowed categories
         if self.allowed_categories and not (paper_categories & self.allowed_categories):
-            self.log_info(f"论文不包含允许的分类，跳过下载: {paper.id}")
+            self.log_info(f"Paper does not contain allowed category, skipping download: {paper.id}")
             return False
         
         return True
     
     def post_download(self, paper: Paper, filepath: Path, success: bool) -> None:
-        """分类过滤插件无需后处理"""
+        """Category filter plugin requires no post-processing"""
         pass
 
 class MetadataPlugin(DownloadPlugin, LoggerMixin):
-    """元数据保存插件"""
+    """Metadata saving plugin"""
     
     def __init__(self, download_dir: Optional[Path] = None):
         super().__init__("metadata")
@@ -144,11 +144,11 @@ class MetadataPlugin(DownloadPlugin, LoggerMixin):
         self.metadata_dir.mkdir(exist_ok=True)
     
     def pre_download(self, paper: Paper) -> bool:
-        """元数据插件不影响下载决策"""
+        """Metadata plugin does not affect download decision"""
         return True
     
     def post_download(self, paper: Paper, filepath: Path, success: bool) -> None:
-        """保存论文元数据"""
+        """Save paper metadata"""
         if not success:
             return
         
@@ -169,10 +169,10 @@ class MetadataPlugin(DownloadPlugin, LoggerMixin):
         with open(metadata_file, 'w', encoding='utf-8') as f:
             json.dump(metadata, f, ensure_ascii=False, indent=2)
         
-        self.log_info(f"保存元数据: {paper.id}")
+        self.log_info(f"Saved metadata: {paper.id}")
 
 class StatisticsPlugin(DownloadPlugin, LoggerMixin):
-    """统计插件"""
+    """Statistics plugin"""
     
     def __init__(self, download_dir: Optional[Path] = None):
         super().__init__("statistics")
@@ -181,7 +181,7 @@ class StatisticsPlugin(DownloadPlugin, LoggerMixin):
         self.stats = self._load_stats()
     
     def _load_stats(self) -> Dict[str, Any]:
-        """加载统计数据"""
+        """Load statistics data"""
         if self.stats_file.exists():
             with open(self.stats_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
@@ -195,34 +195,34 @@ class StatisticsPlugin(DownloadPlugin, LoggerMixin):
         }
     
     def _save_stats(self):
-        """保存统计数据"""
+        """Save statistics data"""
         with open(self.stats_file, 'w', encoding='utf-8') as f:
             json.dump(self.stats, f, ensure_ascii=False, indent=2)
     
     def pre_download(self, paper: Paper) -> bool:
-        """统计插件不影响下载决策"""
+        """Statistics plugin does not affect download decision"""
         return True
     
     def post_download(self, paper: Paper, filepath: Path, success: bool) -> None:
-        """更新统计数据"""
+        """Update statistics data"""
         today = datetime.now().strftime('%Y-%m-%d')
         
-        # 更新总体统计
+        # Update overall statistics
         self.stats['total_downloads'] += 1
         if success:
             self.stats['successful_downloads'] += 1
         else:
             self.stats['failed_downloads'] += 1
         
-        # 更新分类统计
+        # Update category statistics
         for category in paper.categories:
             self.stats['categories'][category] = self.stats['categories'].get(category, 0) + 1
         
-        # 更新作者统计
+        # Update author statistics
         for author in paper.authors:
             self.stats['authors'][author] = self.stats['authors'].get(author, 0) + 1
         
-        # 更新日期统计
+        # Update daily statistics
         if today not in self.stats['daily_stats']:
             self.stats['daily_stats'][today] = {'downloads': 0, 'successful': 0}
         
@@ -231,36 +231,36 @@ class StatisticsPlugin(DownloadPlugin, LoggerMixin):
             self.stats['daily_stats'][today]['successful'] += 1
         
         self._save_stats()
-        self.log_info(f"更新统计数据: {paper.id}")
+        self.log_info(f"Updated statistics data: {paper.id}")
 
 class PluginManager(LoggerMixin):
-    """插件管理器"""
+    """Plugin manager"""
     
     def __init__(self):
         self.plugins: List[DownloadPlugin] = []
     
     def register_plugin(self, plugin: DownloadPlugin):
-        """注册插件"""
+        """Register plugin"""
         self.plugins.append(plugin)
-        self.log_info(f"注册插件: {plugin.name}")
+        self.log_info(f"Registered plugin: {plugin.name}")
     
     def unregister_plugin(self, plugin_name: str):
-        """注销插件"""
+        """Unregister plugin"""
         self.plugins = [p for p in self.plugins if p.name != plugin_name]
-        self.log_info(f"注销插件: {plugin_name}")
+        self.log_info(f"Unregistered plugin: {plugin_name}")
     
     def get_plugin(self, plugin_name: str) -> Optional[DownloadPlugin]:
-        """获取插件"""
+        """Get plugin"""
         for plugin in self.plugins:
             if plugin.name == plugin_name:
                 return plugin
         return None
     
     def pre_download_hook(self, paper: Paper) -> bool:
-        """执行所有插件的下载前钩子
+        """Execute pre-download hooks for all plugins
         
         Returns:
-            True继续下载，False跳过下载
+            True to continue download, False to skip download
         """
         for plugin in self.plugins:
             if plugin.enabled:
@@ -268,20 +268,20 @@ class PluginManager(LoggerMixin):
                     if not plugin.pre_download(paper):
                         return False
                 except Exception as e:
-                    self.log_error(f"插件 {plugin.name} 执行失败: {str(e)}")
+                    self.log_error(f"Plugin {plugin.name} execution failed: {str(e)}")
         return True
     
     def post_download_hook(self, paper: Paper, filepath: Path, success: bool):
-        """执行所有插件的下载后钩子"""
+        """Execute post-download hooks for all plugins"""
         for plugin in self.plugins:
             if plugin.enabled:
                 try:
                     plugin.post_download(paper, filepath, success)
                 except Exception as e:
-                    self.log_error(f"插件 {plugin.name} 执行失败: {str(e)}")
+                    self.log_error(f"Plugin {plugin.name} execution failed: {str(e)}")
     
     def list_plugins(self) -> List[Dict[str, Any]]:
-        """列出所有插件"""
+        """List all plugins"""
         return [
             {
                 'name': plugin.name,
@@ -291,12 +291,12 @@ class PluginManager(LoggerMixin):
             for plugin in self.plugins
         ]
 
-# 预定义插件配置
+# Predefined plugin configuration
 def create_default_plugins(download_dir: Optional[Path] = None) -> PluginManager:
-    """创建默认插件配置"""
+    """Create default plugin configuration"""
     manager = PluginManager()
     
-    # 添加默认插件
+    # Add default plugins
     manager.register_plugin(DuplicateCheckPlugin(download_dir))
     manager.register_plugin(MetadataPlugin(download_dir))
     manager.register_plugin(StatisticsPlugin(download_dir))
@@ -304,10 +304,10 @@ def create_default_plugins(download_dir: Optional[Path] = None) -> PluginManager
     return manager
 
 if __name__ == "__main__":
-    # 示例用法
+    # Example usage
     manager = create_default_plugins()
     
-    # 创建示例论文
+    # Create example paper
     paper = Paper(
         id="2301.00001",
         title="Example Paper",
@@ -318,16 +318,16 @@ if __name__ == "__main__":
         categories=["cs.AI", "cs.LG"]
     )
     
-    # 执行插件钩子
+    # Execute plugin hooks
     should_download = manager.pre_download_hook(paper)
-    print(f"是否应该下载: {should_download}")
+    print(f"Should download: {should_download}")
     
     if should_download:
-        # 模拟下载
+        # Simulate download
         filepath = Path("/tmp/example.pdf")
         success = True
         manager.post_download_hook(paper, filepath, success)
     
-    # 列出插件
+    # List plugins
     plugins = manager.list_plugins()
-    print(f"已注册插件: {plugins}")
+    print(f"Registered plugins: {plugins}")

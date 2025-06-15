@@ -1,6 +1,6 @@
 <template>
   <div class="downloads-page">
-    <!-- 下载统计卡片 -->
+    <!-- Download statistics cards -->
     <el-row :gutter="20" class="stats-row">
       <el-col :span="6">
         <el-card class="stat-card" shadow="hover">
@@ -10,7 +10,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ downloadStats.total }}</div>
-              <div class="stat-label">总下载数</div>
+              <div class="stat-label">Total Downloads</div>
             </div>
           </div>
         </el-card>
@@ -24,7 +24,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ downloadStats.success }}</div>
-              <div class="stat-label">成功下载</div>
+              <div class="stat-label">Successful Downloads</div>
             </div>
           </div>
         </el-card>
@@ -38,7 +38,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ downloadStats.downloading }}</div>
-              <div class="stat-label">下载中</div>
+              <div class="stat-label">Downloading</div>
             </div>
           </div>
         </el-card>
@@ -52,49 +52,49 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ downloadStats.failed }}</div>
-              <div class="stat-label">下载失败</div>
+              <div class="stat-label">Failed Downloads</div>
             </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 操作工具栏 -->
+    <!-- Toolbar -->
     <el-card class="toolbar-card" shadow="hover">
       <div class="toolbar">
         <div class="toolbar-left">
           <el-button-group>
             <el-button @click="refreshDownloads">
               <el-icon><Refresh /></el-icon>
-              刷新
+              Refresh
             </el-button>
             <el-button @click="clearCompleted">
               <el-icon><Delete /></el-icon>
-              清除已完成
+              Clear Completed
             </el-button>
             <el-button @click="pauseAll">
               <el-icon><VideoPause /></el-icon>
-              暂停全部
+              Pause All
             </el-button>
             <el-button @click="resumeAll">
               <el-icon><VideoPlay /></el-icon>
-              恢复全部
+              Resume All
             </el-button>
           </el-button-group>
         </div>
         
         <div class="toolbar-right">
-          <el-select v-model="filterStatus" placeholder="筛选状态" style="width: 120px; margin-right: 10px;">
-            <el-option label="全部" value="" />
-            <el-option label="下载中" value="downloading" />
-            <el-option label="已完成" value="completed" />
-            <el-option label="已暂停" value="paused" />
-            <el-option label="失败" value="failed" />
+          <el-select v-model="filterStatus" placeholder="Filter Status" style="width: 120px; margin-right: 10px;">
+            <el-option label="All" value="" />
+            <el-option label="Downloading" value="downloading" />
+            <el-option label="Completed" value="completed" />
+            <el-option label="Paused" value="paused" />
+            <el-option label="Failed" value="failed" />
           </el-select>
           
           <el-input
             v-model="searchKeyword"
-            placeholder="搜索论文标题"
+            placeholder="Search paper title"
             style="width: 200px;"
             clearable
           >
@@ -106,12 +106,12 @@
       </div>
     </el-card>
 
-    <!-- 下载列表 -->
+    <!-- Download list -->
     <el-card class="downloads-list-card" shadow="hover">
       <template #header>
         <div class="card-header">
           <el-icon><Download /></el-icon>
-          <span>下载列表 ({{ filteredDownloads.length }})</span>
+          <span>Download List ({{ filteredDownloads.length }})</span>
           <div class="header-actions">
             <el-button-group>
               <el-button :type="viewMode === 'list' ? 'primary' : ''" @click="viewMode = 'list'">
@@ -125,10 +125,10 @@
         </div>
       </template>
       
-      <!-- 列表视图 -->
+      <!-- List view -->
       <div v-if="viewMode === 'list'">
         <el-table :data="filteredDownloads" stripe style="width: 100%">
-          <el-table-column label="论文信息" min-width="300">
+          <el-table-column label="Paper Info" min-width="300">
             <template #default="{ row }">
               <div class="paper-info">
                 <div class="paper-title">{{ row.title }}</div>
@@ -140,7 +140,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="状态" width="120">
+          <el-table-column label="Status" width="120">
             <template #default="{ row }">
               <el-tag :type="getStatusType(row.status)" size="small">
                 {{ getStatusText(row.status) }}
@@ -148,7 +148,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="进度" width="200">
+          <el-table-column label="Progress" width="200">
             <template #default="{ row }">
               <div class="progress-container">
                 <el-progress
@@ -161,7 +161,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="速度" width="100">
+          <el-table-column label="Speed" width="100">
             <template #default="{ row }">
               <span v-if="row.status === 'downloading'" class="download-speed">
                 {{ formatSpeed(row.speed) }}
@@ -170,13 +170,13 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="开始时间" width="150">
+          <el-table-column label="Start Time" width="150">
             <template #default="{ row }">
               {{ formatDateTime(row.startTime) }}
             </template>
           </el-table-column>
           
-          <el-table-column label="操作" width="200" fixed="right">
+          <el-table-column label="Actions" width="200" fixed="right">
             <template #default="{ row }">
               <el-button-group>
                 <el-button
@@ -218,7 +218,7 @@
         </el-table>
       </div>
       
-      <!-- 卡片视图 -->
+      <!-- Card view -->
       <div v-else class="card-view">
         <el-row :gutter="20">
           <el-col :span="8" v-for="download in filteredDownloads" :key="download.id">
@@ -259,7 +259,7 @@
                     @click="pauseDownload(download)"
                   >
                     <el-icon><VideoPause /></el-icon>
-                    暂停
+                    Pause
                   </el-button>
                   
                   <el-button
@@ -269,7 +269,7 @@
                     @click="resumeDownload(download)"
                   >
                     <el-icon><VideoPlay /></el-icon>
-                    恢复
+                    Resume
                   </el-button>
                   
                   <el-button
@@ -279,7 +279,7 @@
                     @click="openFile(download)"
                   >
                     <el-icon><FolderOpened /></el-icon>
-                    打开
+                    Open
                   </el-button>
                   
                   <el-button
@@ -288,7 +288,7 @@
                     @click="removeDownload(download)"
                   >
                     <el-icon><Delete /></el-icon>
-                    删除
+                    Delete
                   </el-button>
                 </el-button-group>
               </div>
@@ -297,8 +297,8 @@
         </el-row>
       </div>
       
-      <!-- 空状态 -->
-      <el-empty v-if="filteredDownloads.length === 0" description="暂无下载任务" />
+      <!-- Empty state -->
+      <el-empty v-if="filteredDownloads.length === 0" description="No download tasks" />
     </el-card>
   </div>
 </template>
@@ -308,14 +308,14 @@ import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 
-// 状态变量
+// State variables
 const downloads = ref([])
 const filterStatus = ref('')
 const searchKeyword = ref('')
 const viewMode = ref('list')
 const refreshTimer = ref(null)
 
-// 下载统计
+// Download statistics
 const downloadStats = computed(() => {
   const stats = {
     total: downloads.value.length,
@@ -341,16 +341,16 @@ const downloadStats = computed(() => {
   return stats
 })
 
-// 过滤后的下载列表
+// Filtered download list
 const filteredDownloads = computed(() => {
   let filtered = downloads.value
   
-  // 状态筛选
+  // Status filtering
   if (filterStatus.value) {
     filtered = filtered.filter(download => download.status === filterStatus.value)
   }
   
-  // 关键词搜索
+  // Keyword search
   if (searchKeyword.value) {
     const keyword = searchKeyword.value.toLowerCase()
     filtered = filtered.filter(download => 
@@ -362,7 +362,7 @@ const filteredDownloads = computed(() => {
   return filtered
 })
 
-// 获取状态类型
+// Get status type
 const getStatusType = (status) => {
   const typeMap = {
     'downloading': 'primary',
@@ -373,18 +373,18 @@ const getStatusType = (status) => {
   return typeMap[status] || 'info'
 }
 
-// 获取状态文本
+// Get status text
 const getStatusText = (status) => {
   const textMap = {
-    'downloading': '下载中',
-    'completed': '已完成',
-    'paused': '已暂停',
-    'failed': '失败'
+    'downloading': 'Downloading',
+    'completed': 'Completed',
+    'paused': 'Paused',
+    'failed': 'Failed'
   }
-  return textMap[status] || '未知'
+  return textMap[status] || 'Unknown'
 }
 
-// 获取进度条状态
+// Get progress bar status
 const getProgressStatus = (status) => {
   const statusMap = {
     'downloading': '',
@@ -395,7 +395,7 @@ const getProgressStatus = (status) => {
   return statusMap[status] || ''
 }
 
-// 格式化文件大小
+// Format file size
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 B'
   const k = 1024
@@ -404,28 +404,28 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// 格式化下载速度
+// Format download speed
 const formatSpeed = (bytesPerSecond) => {
   return formatFileSize(bytesPerSecond) + '/s'
 }
 
-// 格式化日期时间
+// Format date time
 const formatDateTime = (datetime) => {
   return dayjs(datetime).format('MM-DD HH:mm')
 }
 
-// 刷新下载列表
+// Refresh download list
 const refreshDownloads = async () => {
   try {
-    // 模拟API调用
+    // Mock API call
     downloads.value = generateMockDownloads()
-    ElMessage.success('刷新成功')
+    ElMessage.success('Refresh successful')
   } catch (error) {
-    ElMessage.error('刷新失败')
+    ElMessage.error('Refresh failed')
   }
 }
 
-// 生成模拟下载数据
+// Generate mock download data
 const generateMockDownloads = () => {
   const statuses = ['downloading', 'completed', 'paused', 'failed']
   const mockDownloads = []
@@ -452,35 +452,35 @@ const generateMockDownloads = () => {
   return mockDownloads
 }
 
-// 暂停下载
+// Pause download
 const pauseDownload = async (download) => {
   try {
     download.status = 'paused'
-    ElMessage.success(`已暂停: ${download.title}`)
+    ElMessage.success(`Paused: ${download.title}`)
   } catch (error) {
-    ElMessage.error('暂停失败')
+    ElMessage.error('Pause failed')
   }
 }
 
-// 恢复下载
+// Resume download
 const resumeDownload = async (download) => {
   try {
     download.status = 'downloading'
-    ElMessage.success(`已恢复: ${download.title}`)
+    ElMessage.success(`Resumed: ${download.title}`)
   } catch (error) {
-    ElMessage.error('恢复失败')
+    ElMessage.error('Resume failed')
   }
 }
 
-// 删除下载
+// Remove download
 const removeDownload = async (download) => {
   try {
     const result = await ElMessageBox.confirm(
-      `确定要删除下载任务 "${download.title}" 吗？`,
-      '删除确认',
+      `Are you sure you want to delete download task "${download.title}"?`,
+      'Delete Confirmation',
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
@@ -489,67 +489,67 @@ const removeDownload = async (download) => {
       const index = downloads.value.findIndex(d => d.id === download.id)
       if (index > -1) {
         downloads.value.splice(index, 1)
-        ElMessage.success('删除成功')
+        ElMessage.success('Delete successful')
       }
     }
   } catch (error) {
-    // 用户取消
+    // User cancelled
   }
 }
 
-// 打开文件
+// Open file
 const openFile = (download) => {
-  ElMessage.success(`打开文件: ${download.filePath}`)
-  // 这里应该调用系统API打开文件
+  ElMessage.success(`Open file: ${download.filePath}`)
+  // Should call system API to open file here
 }
 
-// 清除已完成的下载
+// Clear completed downloads
 const clearCompleted = async () => {
   try {
     const completedCount = downloads.value.filter(d => d.status === 'completed').length
     if (completedCount === 0) {
-      ElMessage.info('没有已完成的下载任务')
+      ElMessage.info('No completed download tasks')
       return
     }
     
     const result = await ElMessageBox.confirm(
-      `确定要清除 ${completedCount} 个已完成的下载任务吗？`,
-      '清除确认',
+      `Are you sure you want to clear ${completedCount} completed download tasks?`,
+      'Clear Confirmation',
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
     
     if (result === 'confirm') {
       downloads.value = downloads.value.filter(d => d.status !== 'completed')
-      ElMessage.success(`已清除 ${completedCount} 个已完成的任务`)
+      ElMessage.success(`Cleared ${completedCount} completed tasks`)
     }
   } catch (error) {
-    // 用户取消
+    // User cancelled
   }
 }
 
-// 暂停全部
+// Pause all
 const pauseAll = () => {
   const downloadingTasks = downloads.value.filter(d => d.status === 'downloading')
   downloadingTasks.forEach(task => {
     task.status = 'paused'
   })
-  ElMessage.success(`已暂停 ${downloadingTasks.length} 个下载任务`)
+  ElMessage.success(`Paused ${downloadingTasks.length} download tasks`)
 }
 
-// 恢复全部
+// Resume all
 const resumeAll = () => {
   const pausedTasks = downloads.value.filter(d => d.status === 'paused')
   pausedTasks.forEach(task => {
     task.status = 'downloading'
   })
-  ElMessage.success(`已恢复 ${pausedTasks.length} 个下载任务`)
+  ElMessage.success(`Resumed ${pausedTasks.length} download tasks`)
 }
 
-// 模拟进度更新
+// Mock progress update
 const updateProgress = () => {
   downloads.value.forEach(download => {
     if (download.status === 'downloading' && download.progress < 100) {
@@ -565,7 +565,7 @@ const updateProgress = () => {
 onMounted(() => {
   refreshDownloads()
   
-  // 定时更新进度
+  // Timer for progress update
   refreshTimer.value = setInterval(updateProgress, 2000)
 })
 
@@ -747,7 +747,7 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-/* 暗色主题适配 */
+/* Dark theme adaptation */
 :global(.dark) .stat-number {
   color: #e5eaf3;
 }

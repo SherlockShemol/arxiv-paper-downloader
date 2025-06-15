@@ -1,33 +1,33 @@
-"""数据模型和异常定义"""
+"""Data models and exception definitions"""
 
 from dataclasses import dataclass
 from typing import List, Optional
 from pathlib import Path
 
-# 异常类定义
+# Exception class definitions
 class ArxivDownloadError(Exception):
-    """ArXiv下载相关异常基类"""
+    """Base class for ArXiv download related exceptions"""
     pass
 
 class NetworkError(ArxivDownloadError):
-    """网络相关异常"""
+    """Network related exceptions"""
     pass
 
 class FileOperationError(ArxivDownloadError):
-    """文件操作异常"""
+    """File operation exceptions"""
     pass
 
 class ValidationError(ArxivDownloadError):
-    """数据验证异常"""
+    """Data validation exceptions"""
     pass
 
 class ParseError(ArxivDownloadError):
-    """解析异常"""
+    """Parsing exceptions"""
     pass
 
 @dataclass
 class Paper:
-    """论文数据类"""
+    """Paper data class"""
     id: str
     title: str
     authors: List[str]
@@ -37,39 +37,39 @@ class Paper:
     categories: List[str]
     
     def __post_init__(self):
-        """数据验证"""
+        """Data validation"""
         if not self.id or not self.title:
-            raise ValidationError("论文ID和标题不能为空")
+            raise ValidationError("Paper ID and title cannot be empty")
         
         if not self.pdf_url or not self.pdf_url.startswith('http'):
-            raise ValidationError("无效的PDF URL")
+            raise ValidationError("Invalid PDF URL")
         
         if not isinstance(self.authors, list):
-            raise ValidationError("作者信息必须是列表格式")
+            raise ValidationError("Author information must be in list format")
         
         if not isinstance(self.categories, list):
-            raise ValidationError("类别信息必须是列表格式")
+            raise ValidationError("Category information must be in list format")
     
     @property
     def short_abstract(self, max_length: int = 200) -> str:
-        """获取简短摘要"""
+        """Get short abstract"""
         if len(self.abstract) <= max_length:
             return self.abstract
         return self.abstract[:max_length] + "..."
     
     @property
     def authors_str(self) -> str:
-        """获取作者字符串"""
+        """Get authors string"""
         return ', '.join(self.authors)
     
     @property
     def categories_str(self) -> str:
-        """获取类别字符串"""
+        """Get categories string"""
         return ', '.join(self.categories)
 
 @dataclass
 class DownloadStats:
-    """下载统计数据类"""
+    """Download statistics data class"""
     total_papers: int = 0
     successful_downloads: int = 0
     failed_downloads: int = 0
@@ -79,33 +79,33 @@ class DownloadStats:
     
     @property
     def success_rate(self) -> float:
-        """成功率"""
+        """Success rate"""
         if self.total_papers == 0:
             return 0.0
         return self.successful_downloads / self.total_papers
     
     @property
     def average_speed_mbps(self) -> float:
-        """平均下载速度 (MB/s)"""
+        """Average download speed (MB/s)"""
         if self.download_time_seconds == 0:
             return 0.0
         return self.total_size_mb / self.download_time_seconds
     
     def add_success(self, file_size_mb: float = 0.0):
-        """添加成功下载记录"""
+        """Add successful download record"""
         self.successful_downloads += 1
         self.total_size_mb += file_size_mb
     
     def add_failure(self):
-        """添加失败下载记录"""
+        """Add failed download record"""
         self.failed_downloads += 1
     
     def add_skip(self):
-        """添加跳过下载记录"""
+        """Add skipped download record"""
         self.skipped_downloads += 1
     
     def reset(self):
-        """重置统计数据"""
+        """Reset statistics data"""
         self.total_papers = 0
         self.successful_downloads = 0
         self.failed_downloads = 0
@@ -114,9 +114,9 @@ class DownloadStats:
         self.download_time_seconds = 0.0
     
     def __str__(self) -> str:
-        """统计信息字符串表示"""
-        return (f"总计: {self.total_papers}, "
-                f"成功: {self.successful_downloads}, "
-                f"失败: {self.failed_downloads}, "
-                f"跳过: {self.skipped_downloads}, "
-                f"成功率: {self.success_rate:.1%}")
+        """String representation of statistics"""
+        return (f"Total: {self.total_papers}, "
+                f"Success: {self.successful_downloads}, "
+                f"Failed: {self.failed_downloads}, "
+                f"Skipped: {self.skipped_downloads}, "
+                f"Success rate: {self.success_rate:.1%}")

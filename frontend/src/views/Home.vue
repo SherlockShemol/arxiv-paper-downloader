@@ -1,19 +1,19 @@
 <template>
   <div class="home">
-    <!-- 欢迎横幅 -->
+    <!-- Welcome area -->
     <el-card class="welcome-card" shadow="hover">
       <div class="welcome-content">
         <div class="welcome-text">
-          <h1>欢迎使用 ArXiv 论文下载器</h1>
-          <p>智能搜索、批量下载、高效管理学术论文的专业工具</p>
+          <h1>Welcome to ArXiv Paper Downloader</h1>
+        <p>Professional tool for intelligent search, batch download, and efficient management of academic papers</p>
           <div class="quick-actions">
             <el-button type="primary" size="large" @click="$router.push('/search')">
               <el-icon><Search /></el-icon>
-              开始搜索
+              Start Search
             </el-button>
             <el-button size="large" @click="$router.push('/downloads')">
               <el-icon><Download /></el-icon>
-              查看下载
+              View Downloads
             </el-button>
           </div>
         </div>
@@ -23,7 +23,7 @@
       </div>
     </el-card>
 
-    <!-- 统计卡片 -->
+    <!-- Statistics cards -->
     <el-row :gutter="20" class="stats-row">
       <el-col :span="6">
         <el-card class="stat-card" shadow="hover">
@@ -33,7 +33,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ stats.totalSearches }}</div>
-              <div class="stat-label">总搜索次数</div>
+              <div class="stat-label">Total Searches</div>
             </div>
           </div>
         </el-card>
@@ -47,7 +47,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ stats.totalDownloads }}</div>
-              <div class="stat-label">已下载论文</div>
+              <div class="stat-label">Downloaded Papers</div>
             </div>
           </div>
         </el-card>
@@ -61,7 +61,7 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ stats.successRate }}%</div>
-              <div class="stat-label">成功率</div>
+              <div class="stat-label">Success Rate</div>
             </div>
           </div>
         </el-card>
@@ -75,29 +75,29 @@
             </div>
             <div class="stat-info">
               <div class="stat-number">{{ formatFileSize(stats.totalSize) }}</div>
-              <div class="stat-label">存储空间</div>
+              <div class="stat-label">Storage Space</div>
             </div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 功能特性 -->
+    <!-- Core features -->
     <el-row :gutter="20" class="features-row">
       <el-col :span="12">
         <el-card class="feature-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><Star /></el-icon>
-              <span>核心功能</span>
+              <span>Core Features</span>
             </div>
           </template>
           <ul class="feature-list">
-            <li><el-icon><Check /></el-icon> 智能搜索与过滤</li>
-            <li><el-icon><Check /></el-icon> 批量下载管理</li>
-            <li><el-icon><Check /></el-icon> 自动文件命名</li>
-            <li><el-icon><Check /></el-icon> 下载进度跟踪</li>
-            <li><el-icon><Check /></el-icon> 错误重试机制</li>
+            <li><el-icon><Check /></el-icon> Intelligent Search & Filtering</li>
+            <li><el-icon><Check /></el-icon> Batch Download Management</li>
+            <li><el-icon><Check /></el-icon> Automatic File Naming</li>
+            <li><el-icon><Check /></el-icon> Download Progress Tracking</li>
+            <li><el-icon><Check /></el-icon> Error Retry Mechanism</li>
           </ul>
         </el-card>
       </el-col>
@@ -107,29 +107,29 @@
           <template #header>
             <div class="card-header">
               <el-icon><Lightning /></el-icon>
-              <span>高级特性</span>
+              <span>Advanced Features</span>
             </div>
           </template>
           <ul class="feature-list">
-            <li><el-icon><Check /></el-icon> 异步并发下载</li>
-            <li><el-icon><Check /></el-icon> 智能缓存系统</li>
-            <li><el-icon><Check /></el-icon> 插件扩展支持</li>
-            <li><el-icon><Check /></el-icon> 详细统计分析</li>
-            <li><el-icon><Check /></el-icon> 多格式导出</li>
+            <li><el-icon><Check /></el-icon> Asynchronous Concurrent Download</li>
+            <li><el-icon><Check /></el-icon> Intelligent Cache System</li>
+            <li><el-icon><Check /></el-icon> Plugin Extension Support</li>
+            <li><el-icon><Check /></el-icon> Detailed Statistical Analysis</li>
+            <li><el-icon><Check /></el-icon> Multi-format Export</li>
           </ul>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 最近活动 -->
+    <!-- Recent activity -->
     <el-card class="recent-activity" shadow="hover">
       <template #header>
         <div class="card-header">
           <el-icon><Clock /></el-icon>
-          <span>最近活动</span>
+          <span>Recent Activity</span>
           <el-button text @click="loadRecentActivity">
             <el-icon><Refresh /></el-icon>
-            刷新
+            Refresh
           </el-button>
         </div>
       </template>
@@ -145,7 +145,7 @@
         </el-timeline-item>
       </el-timeline>
       
-      <el-empty v-else description="暂无最近活动" />
+      <el-empty v-else description="No recent activity" />
     </el-card>
   </div>
 </template>
@@ -154,7 +154,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 
-// 统计数据
+// Reactive data
 const stats = ref({
   totalSearches: 0,
   totalDownloads: 0,
@@ -162,10 +162,10 @@ const stats = ref({
   totalSize: 0
 })
 
-// 最近活动
+// Recent activity data
 const recentActivity = ref([])
 
-// 格式化文件大小
+// Methods
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 B'
   const k = 1024
@@ -174,10 +174,10 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// 加载统计数据
+// Load data
 const loadStats = async () => {
   try {
-    // 模拟API调用
+    // Simulate API call
     stats.value = {
       totalSearches: 156,
       totalDownloads: 89,
@@ -185,38 +185,38 @@ const loadStats = async () => {
       totalSize: 2147483648 // 2GB
     }
   } catch (error) {
-    ElMessage.error('加载统计数据失败')
+    ElMessage.error('Failed to load statistics data')
   }
 }
 
-// 加载最近活动
+// Load recent activity
 const loadRecentActivity = async () => {
   try {
-    // 模拟API调用
+    // Simulate API call
     recentActivity.value = [
       {
         timestamp: '2024-01-15 14:30',
         type: 'success',
-        description: '成功下载论文: "Attention Is All You Need"'
+        description: 'Successfully downloaded paper: "Attention Is All You Need"'
       },
       {
         timestamp: '2024-01-15 14:25',
         type: 'primary',
-        description: '开始搜索关键词: "transformer neural network"'
+        description: 'Started searching for keyword: "transformer neural network"'
       },
       {
         timestamp: '2024-01-15 14:20',
         type: 'success',
-        description: '批量下载完成，共下载 5 篇论文'
+        description: 'Batch download completed, downloaded 5 papers in total'
       },
       {
         timestamp: '2024-01-15 14:15',
         type: 'warning',
-        description: '下载重试: "BERT: Pre-training of Deep Bidirectional Transformers"'
+        description: 'Download retry: "BERT: Pre-training of Deep Bidirectional Transformers"'
       }
     ]
   } catch (error) {
-    ElMessage.error('加载最近活动失败')
+    ElMessage.error('Failed to load recent activities')
   }
 }
 
@@ -351,7 +351,7 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-/* 暗色主题适配 */
+/* Dark theme adaptation */
 :global(.dark) .welcome-text h1 {
   color: #e5eaf3;
 }

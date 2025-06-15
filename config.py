@@ -1,52 +1,52 @@
-"""配置管理模块"""
+"""Configuration management module"""
 
 from pathlib import Path
 
 class Config:
-    """应用配置类"""
+    """Application configuration class"""
     
-    # 默认配置
+    # Default configuration
     DEFAULT_DOWNLOAD_DIR = "~/Downloads/arxiv_papers"
     DEFAULT_QUERY = "cat:cs.AI"
     DEFAULT_MAX_RESULTS = 10
     
-    # 文件处理配置
+    # File processing configuration
     MAX_FILENAME_LENGTH = 100
-    REQUEST_DELAY = 1  # 秒
-    API_TIMEOUT = 30   # 秒
-    DOWNLOAD_TIMEOUT = 60  # 秒
+    REQUEST_DELAY = 1  # seconds
+    API_TIMEOUT = 30   # seconds
+    DOWNLOAD_TIMEOUT = 60  # seconds
     CHUNK_SIZE = 8192
     
-    # 文件名清理规则
+    # Filename cleaning rules
     INVALID_CHARS_PATTERN = r'[<>:"/\\|?*]'
     WHITESPACE_PATTERN = r'\s+'
     
-    # 重试配置
+    # Retry configuration
     MAX_RETRIES = 3
-    RETRY_DELAY_BASE = 2  # 指数退避基数
+    RETRY_DELAY_BASE = 2  # exponential backoff base
     
-    # 并发配置
+    # Concurrency configuration
     MAX_CONCURRENT_DOWNLOADS = 5
     
-    # 日志配置
+    # Logging configuration
     LOG_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
     LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
     
     @classmethod
     def get_download_dir(cls, custom_dir=None):
-        """获取下载目录"""
+        """Get download directory"""
         if custom_dir:
             return Path(custom_dir)
         return Path(cls.DEFAULT_DOWNLOAD_DIR)
     
     @classmethod
     def get_cache_dir(cls, download_dir=None):
-        """获取缓存目录"""
+        """Get cache directory"""
         base_dir = cls.get_download_dir(download_dir)
         return base_dir / '.cache'
     
     @classmethod
     def get_log_dir(cls, download_dir=None):
-        """获取日志目录"""
+        """Get log directory"""
         base_dir = cls.get_download_dir(download_dir)
         return base_dir / '.logs'

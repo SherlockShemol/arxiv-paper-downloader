@@ -1,21 +1,21 @@
 <template>
   <div class="search-page">
-    <!-- 搜索表单 -->
+    <!-- Search form -->
     <el-card class="search-form-card" shadow="hover">
       <template #header>
         <div class="card-header">
           <el-icon><Search /></el-icon>
-          <span>论文搜索</span>
+          <span>Paper Search</span>
         </div>
       </template>
       
       <el-form :model="searchForm" :rules="rules" ref="searchFormRef" label-width="100px">
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="搜索关键词" prop="query">
+            <el-form-item label="Search Keywords" prop="query">
               <el-input
                 v-model="searchForm.query"
-                placeholder="请输入论文标题、作者或关键词"
+                placeholder="Enter paper title, author or keywords"
                 clearable
                 @keyup.enter="handleSearch"
               >
@@ -27,7 +27,7 @@
           </el-col>
           
           <el-col :span="6">
-            <el-form-item label="最大结果数">
+            <el-form-item label="Max Results">
               <el-input-number
                 v-model="searchForm.maxResults"
                 :min="1"
@@ -39,11 +39,11 @@
           </el-col>
           
           <el-col :span="6">
-            <el-form-item label="排序方式">
+            <el-form-item label="Sort By">
               <el-select v-model="searchForm.sortBy" style="width: 100%">
-                <el-option label="相关性" value="relevance" />
-                <el-option label="提交日期" value="submittedDate" />
-                <el-option label="最后更新" value="lastUpdatedDate" />
+                <el-option label="Relevance" value="relevance" />
+                <el-option label="Submitted Date" value="submittedDate" />
+                <el-option label="Last Updated" value="lastUpdatedDate" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -51,25 +51,25 @@
         
         <el-row :gutter="20">
           <el-col :span="8">
-            <el-form-item label="学科分类">
+            <el-form-item label="Subject Categories">
               <el-select v-model="searchForm.category" clearable style="width: 100%">
-                <el-option label="计算机科学" value="cs" />
-                <el-option label="数学" value="math" />
-                <el-option label="物理" value="physics" />
-                <el-option label="统计学" value="stat" />
-                <el-option label="量化生物学" value="q-bio" />
-                <el-option label="量化金融" value="q-fin" />
-                <el-option label="经济学" value="econ" />
+                <el-option label="Computer Science" value="cs" />
+                <el-option label="Mathematics" value="math" />
+                <el-option label="Physics" value="physics" />
+                <el-option label="Statistics" value="stat" />
+                <el-option label="Quantitative Biology" value="q-bio" />
+                <el-option label="Quantitative Finance" value="q-fin" />
+                <el-option label="Economics" value="econ" />
               </el-select>
             </el-form-item>
           </el-col>
           
           <el-col :span="8">
-            <el-form-item label="开始日期">
+            <el-form-item label="Start Date">
               <el-date-picker
                 v-model="searchForm.dateFrom"
                 type="date"
-                placeholder="选择开始日期"
+                placeholder="Select Start Date"
                 style="width: 100%"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD"
@@ -78,11 +78,11 @@
           </el-col>
           
           <el-col :span="8">
-            <el-form-item label="结束日期">
+            <el-form-item label="End Date">
               <el-date-picker
                 v-model="searchForm.dateTo"
                 type="date"
-                placeholder="选择结束日期"
+                placeholder="Select End Date"
                 style="width: 100%"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD"
@@ -94,26 +94,26 @@
         <el-form-item>
           <el-button type="primary" @click="handleSearch" :loading="searching">
             <el-icon><Search /></el-icon>
-            搜索论文
+            Search Papers
           </el-button>
           <el-button @click="resetForm">
             <el-icon><Refresh /></el-icon>
-            重置
+            Reset
           </el-button>
           <el-button type="success" @click="handleBatchDownload" :disabled="selectedPapers.length === 0">
             <el-icon><Download /></el-icon>
-            批量下载 ({{ selectedPapers.length }})
+            Batch Download ({{ selectedPapers.length }})
           </el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
-    <!-- 搜索结果 -->
+    <!-- Search results -->
     <el-card v-if="searchResults.length > 0 || searching" class="results-card" shadow="hover">
       <template #header>
         <div class="card-header">
           <el-icon><List /></el-icon>
-          <span>搜索结果 ({{ searchResults.length }})</span>
+          <span>Search Results ({{ searchResults.length }})</span>
           <div class="header-actions">
             <el-button-group>
               <el-button :type="viewMode === 'list' ? 'primary' : ''" @click="viewMode = 'list'">
@@ -127,12 +127,12 @@
         </div>
       </template>
       
-      <!-- 加载状态 -->
+      <!-- Loading state -->
       <div v-if="searching" class="loading-container">
         <el-skeleton :rows="5" animated />
       </div>
       
-      <!-- 列表视图 -->
+      <!-- List view -->
       <div v-else-if="viewMode === 'list'" class="list-view">
         <el-table
           :data="searchResults"
@@ -142,7 +142,7 @@
         >
           <el-table-column type="selection" width="55" />
           
-          <el-table-column label="标题" min-width="300">
+          <el-table-column label="Title" min-width="300">
             <template #default="{ row }">
               <div class="paper-title">
                 <a :href="row.url" target="_blank" class="title-link">
@@ -156,18 +156,18 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="作者" width="200">
+          <el-table-column label="Authors" width="200">
             <template #default="{ row }">
               <div class="authors">
                 <span v-for="(author, index) in row.authors.slice(0, 2)" :key="index">
                   {{ author }}<span v-if="index < Math.min(row.authors.length, 2) - 1">, </span>
                 </span>
-                <span v-if="row.authors.length > 2"> 等</span>
+                <span v-if="row.authors.length > 2"> et al.</span>
               </div>
             </template>
           </el-table-column>
           
-          <el-table-column label="摘要" min-width="300">
+          <el-table-column label="Abstract" min-width="300">
             <template #default="{ row }">
               <div class="abstract">
                 {{ row.summary.substring(0, 150) }}...
@@ -175,7 +175,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="操作" width="150" fixed="right">
+          <el-table-column label="Actions" width="150" fixed="right">
             <template #default="{ row }">
               <el-button-group>
                 <el-button size="small" @click="viewPaperDetail(row)">
@@ -190,7 +190,7 @@
         </el-table>
       </div>
       
-      <!-- 网格视图 -->
+      <!-- Grid view -->
       <div v-else class="grid-view">
         <el-row :gutter="20">
           <el-col :span="8" v-for="paper in searchResults" :key="paper.id">
@@ -214,7 +214,7 @@
                 <span v-for="(author, index) in paper.authors.slice(0, 3)" :key="index">
                   {{ author }}<span v-if="index < Math.min(paper.authors.length, 3) - 1">, </span>
                 </span>
-                <span v-if="paper.authors.length > 3"> 等</span>
+                <span v-if="paper.authors.length > 3"> et al.</span>
               </div>
               
               <p class="paper-abstract">{{ paper.summary.substring(0, 120) }}...</p>
@@ -223,7 +223,7 @@
                 <span class="paper-date">{{ formatDate(paper.published) }}</span>
                 <el-button size="small" type="primary" @click.stop="downloadPaper(paper)">
                   <el-icon><Download /></el-icon>
-                  下载
+                  Download
                 </el-button>
               </div>
             </el-card>
@@ -231,7 +231,7 @@
         </el-row>
       </div>
       
-      <!-- 分页 -->
+      <!-- Pagination -->
       <div class="pagination-container" v-if="searchResults.length > 0">
         <el-pagination
           v-model:current-page="currentPage"
@@ -245,52 +245,52 @@
       </div>
     </el-card>
 
-    <!-- 论文详情对话框 -->
-    <el-dialog v-model="detailDialogVisible" title="论文详情" width="80%" top="5vh">
+    <!-- Paper details dialog -->
+<el-dialog v-model="detailDialogVisible" title="Paper Details" width="80%" top="5vh">
       <div v-if="selectedPaper" class="paper-detail">
         <h2>{{ selectedPaper.title }}</h2>
         
         <div class="detail-meta">
           <el-descriptions :column="2" border>
             <el-descriptions-item label="ArXiv ID">{{ selectedPaper.id }}</el-descriptions-item>
-            <el-descriptions-item label="分类">{{ selectedPaper.category }}</el-descriptions-item>
-            <el-descriptions-item label="发布日期">{{ formatDate(selectedPaper.published) }}</el-descriptions-item>
-            <el-descriptions-item label="更新日期">{{ formatDate(selectedPaper.updated) }}</el-descriptions-item>
+            <el-descriptions-item label="Category">{{ selectedPaper.category }}</el-descriptions-item>
+        <el-descriptions-item label="Published Date">{{ formatDate(selectedPaper.published) }}</el-descriptions-item>
+        <el-descriptions-item label="Updated Date">{{ formatDate(selectedPaper.updated) }}</el-descriptions-item>
           </el-descriptions>
         </div>
         
         <div class="detail-authors">
-          <h3>作者</h3>
+          <h3>Authors</h3>
           <el-tag v-for="author in selectedPaper.authors" :key="author" class="author-tag">
             {{ author }}
           </el-tag>
         </div>
         
         <div class="detail-abstract">
-          <h3>摘要</h3>
+          <h3>Abstract</h3>
           <p>{{ selectedPaper.summary }}</p>
         </div>
         
         <div class="detail-links">
-          <h3>链接</h3>
+          <h3>Links</h3>
           <el-button-group>
             <el-button @click="openLink(selectedPaper.url)">
               <el-icon><Link /></el-icon>
-              ArXiv 页面
+              ArXiv Page
             </el-button>
             <el-button @click="openLink(selectedPaper.pdfUrl)">
               <el-icon><Document /></el-icon>
-              PDF 链接
+              PDF Link
             </el-button>
           </el-button-group>
         </div>
       </div>
       
       <template #footer>
-        <el-button @click="detailDialogVisible = false">关闭</el-button>
+        <el-button @click="detailDialogVisible = false">Close</el-button>
         <el-button type="primary" @click="downloadPaper(selectedPaper)">
           <el-icon><Download /></el-icon>
-          下载论文
+          Download Paper
         </el-button>
       </template>
     </el-dialog>
@@ -302,7 +302,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
 
-// 表单数据
+// Form data
 const searchForm = reactive({
   query: '',
   maxResults: 20,
@@ -312,17 +312,17 @@ const searchForm = reactive({
   dateTo: ''
 })
 
-// 表单验证规则
+// Form validation rules
 const rules = {
   query: [
-    { required: true, message: '请输入搜索关键词', trigger: 'blur' }
+    { required: true, message: 'Please enter search keywords', trigger: 'blur' }
   ]
 }
 
-// 组件引用
+// Component references
 const searchFormRef = ref()
 
-// 状态变量
+// State variables
 const searching = ref(false)
 const searchResults = ref([])
 const selectedPapers = ref([])
@@ -333,26 +333,26 @@ const totalResults = ref(0)
 const detailDialogVisible = ref(false)
 const selectedPaper = ref(null)
 
-// 搜索论文
+// Search papers
 const handleSearch = async () => {
   try {
     await searchFormRef.value.validate()
     searching.value = true
     
-    // 模拟API调用
+    // Simulate API call
     setTimeout(() => {
       searchResults.value = generateMockResults()
       totalResults.value = searchResults.value.length
       searching.value = false
-      ElMessage.success(`找到 ${searchResults.value.length} 篇相关论文`)
+      ElMessage.success(`Found ${searchResults.value.length} related papers`)
     }, 2000)
     
   } catch (error) {
-    ElMessage.error('搜索失败，请检查输入参数')
+    ElMessage.error('Search failed, please check input parameters')
   }
 }
 
-// 生成模拟搜索结果
+// Generate mock search results
 const generateMockResults = () => {
   const mockPapers = []
   for (let i = 1; i <= 20; i++) {
@@ -372,68 +372,68 @@ const generateMockResults = () => {
   return mockPapers
 }
 
-// 重置表单
+// Reset form
 const resetForm = () => {
   searchFormRef.value.resetFields()
   searchResults.value = []
   selectedPapers.value = []
 }
 
-// 处理选择变化
+// Handle selection change
 const handleSelectionChange = (selection) => {
   selectedPapers.value = selection
 }
 
-// 更新选择状态
+// Update selection state
 const updateSelection = () => {
   selectedPapers.value = searchResults.value.filter(paper => paper.selected)
 }
 
-// 选择论文
+// Select paper
 const selectPaper = (paper) => {
   paper.selected = !paper.selected
   updateSelection()
 }
 
-// 查看论文详情
+// View paper details
 const viewPaperDetail = (paper) => {
   selectedPaper.value = paper
   detailDialogVisible.value = true
 }
 
-// 下载单篇论文
+// Download single paper
 const downloadPaper = async (paper) => {
   try {
-    ElMessage.success(`开始下载: ${paper.title}`)
-    // 这里应该调用实际的下载API
+    ElMessage.success(`Starting download: ${paper.title}`)
+    // Should call actual download API here
   } catch (error) {
-    ElMessage.error('下载失败')
+    ElMessage.error('Download failed')
   }
 }
 
-// 批量下载
+// Batch download
 const handleBatchDownload = async () => {
   try {
     const result = await ElMessageBox.confirm(
-      `确定要下载选中的 ${selectedPapers.value.length} 篇论文吗？`,
-      '批量下载确认',
+      `Are you sure you want to download the selected ${selectedPapers.value.length} papers?`,
+      'Batch Download Confirmation',
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
     
     if (result === 'confirm') {
-      ElMessage.success(`开始批量下载 ${selectedPapers.value.length} 篇论文`)
-      // 这里应该调用实际的批量下载API
+      ElMessage.success(`Starting batch download of ${selectedPapers.value.length} papers`)
+      // Should call actual batch download API here
     }
   } catch (error) {
-    // 用户取消
+    // User cancelled
   }
 }
 
-// 分页处理
+// Pagination handling
 const handleSizeChange = (val) => {
   pageSize.value = val
   handleSearch()
@@ -444,18 +444,18 @@ const handleCurrentChange = (val) => {
   handleSearch()
 }
 
-// 格式化日期
+// Format date
 const formatDate = (date) => {
   return dayjs(date).format('YYYY-MM-DD')
 }
 
-// 打开链接
+// Open link
 const openLink = (url) => {
   window.open(url, '_blank')
 }
 
 onMounted(() => {
-  // 初始化
+  // Initialize
 })
 </script>
 
@@ -627,7 +627,7 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-/* 暗色主题适配 */
+/* Dark theme adaptation */
 :global(.dark) .paper-title-grid a {
   color: #e5eaf3;
 }

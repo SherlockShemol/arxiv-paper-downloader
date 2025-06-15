@@ -1,4 +1,4 @@
-"""工具函数模块"""
+"""Utility functions module"""
 
 import re
 import hashlib
@@ -8,30 +8,30 @@ from typing import Union, Optional
 from config import Config
 
 def sanitize_filename(title: str, max_length: Optional[int] = None) -> str:
-    """清理文件名，移除或替换不合法的字符
+    """Clean filename, remove or replace invalid characters
     
     Args:
-        title: 原始标题
-        max_length: 最大长度，默认使用配置中的值
+        title: Original title
+        max_length: Maximum length, use config value by default
     
     Returns:
-        清理后的文件名
+        Cleaned filename
     """
     if max_length is None:
         max_length = Config.MAX_FILENAME_LENGTH
     
-    # 移除或替换不合法的文件名字符
+    # Remove or replace invalid filename characters
     title = re.sub(Config.INVALID_CHARS_PATTERN, '', title)
-    # 替换多个空格为单个空格
+    # Replace multiple spaces with single space
     title = re.sub(Config.WHITESPACE_PATTERN, ' ', title)
-    # 移除首尾空格
+    # Remove leading and trailing spaces
     title = title.strip()
     
-    # 限制文件名长度
+    # Limit filename length
     if len(title) > max_length:
         title = title[:max_length].rstrip()
     
-    # 如果标题为空，返回默认值
+    # If title is empty, return default value
     if not title:
         return "untitled"
     
@@ -39,28 +39,28 @@ def sanitize_filename(title: str, max_length: Optional[int] = None) -> str:
 
 def generate_query_hash(query: str, date_from: Optional[str] = None, 
                        date_to: Optional[str] = None, max_results: int = 10) -> str:
-    """生成查询的哈希值，用于缓存
+    """Generate hash value for query, used for caching
     
     Args:
-        query: 搜索查询
-        date_from: 开始日期
-        date_to: 结束日期
-        max_results: 最大结果数
+        query: Search query
+        date_from: Start date
+        date_to: End date
+        max_results: Maximum results
     
     Returns:
-        查询的MD5哈希值
+        MD5 hash value of query
     """
     query_str = f"{query}|{date_from}|{date_to}|{max_results}"
     return hashlib.md5(query_str.encode('utf-8')).hexdigest()
 
 def get_file_size_mb(filepath: Union[str, Path]) -> float:
-    """获取文件大小（MB）
+    """Get file size in MB
     
     Args:
-        filepath: 文件路径
+        filepath: File path
     
     Returns:
-        文件大小（MB）
+        File size in MB
     """
     try:
         size_bytes = Path(filepath).stat().st_size
@@ -69,26 +69,26 @@ def get_file_size_mb(filepath: Union[str, Path]) -> float:
         return 0.0
 
 def ensure_directory(directory: Union[str, Path]) -> Path:
-    """确保目录存在
+    """Ensure directory exists
     
     Args:
-        directory: 目录路径
+        directory: Directory path
     
     Returns:
-        Path对象
+        Path object
     """
     dir_path = Path(directory)
     dir_path.mkdir(parents=True, exist_ok=True)
     return dir_path
 
 def is_valid_date_format(date_str: str) -> bool:
-    """检查日期格式是否有效（YYYY-MM-DD）
+    """Check if date format is valid (YYYY-MM-DD)
     
     Args:
-        date_str: 日期字符串
+        date_str: Date string
     
     Returns:
-        是否有效
+        Whether valid
     """
     if not date_str:
         return False
@@ -97,13 +97,13 @@ def is_valid_date_format(date_str: str) -> bool:
     return bool(re.match(pattern, date_str))
 
 def format_file_size(size_bytes: int) -> str:
-    """格式化文件大小显示
+    """Format file size display
     
     Args:
-        size_bytes: 文件大小（字节）
+        size_bytes: File size in bytes
     
     Returns:
-        格式化的文件大小字符串
+        Formatted file size string
     """
     if size_bytes < 1024:
         return f"{size_bytes} B"
@@ -115,15 +115,15 @@ def format_file_size(size_bytes: int) -> str:
         return f"{size_bytes / (1024 * 1024 * 1024):.1f} GB"
 
 def truncate_text(text: str, max_length: int = 100, suffix: str = "...") -> str:
-    """截断文本
+    """Truncate text
     
     Args:
-        text: 原始文本
-        max_length: 最大长度
-        suffix: 截断后缀
+        text: Original text
+        max_length: Maximum length
+        suffix: Truncation suffix
     
     Returns:
-        截断后的文本
+        Truncated text
     """
     if len(text) <= max_length:
         return text
@@ -131,56 +131,56 @@ def truncate_text(text: str, max_length: int = 100, suffix: str = "...") -> str:
     return text[:max_length - len(suffix)] + suffix
 
 def clean_text(text: str) -> str:
-    """清理文本，移除多余的空白字符
+    """Clean text, remove extra whitespace characters
     
     Args:
-        text: 原始文本
+        text: Original text
     
     Returns:
-        清理后的文本
+        Cleaned text
     """
-    # 替换换行符为空格
+    # Replace newlines with spaces
     text = text.replace('\n', ' ').replace('\r', ' ')
-    # 替换多个空格为单个空格
+    # Replace multiple spaces with single space
     text = re.sub(r'\s+', ' ', text)
-    # 移除首尾空格
+    # Remove leading and trailing spaces
     return text.strip()
 
 def validate_url(url: str) -> bool:
-    """验证URL格式
+    """Validate URL format
     
     Args:
-        url: URL字符串
+        url: URL string
     
     Returns:
-        是否有效
+        Whether valid
     """
     if not url:
         return False
     
-    # 简单的URL验证
+    # Simple URL validation
     pattern = r'^https?://[^\s/$.?#].[^\s]*$'
     return bool(re.match(pattern, url, re.IGNORECASE))
 
 def generate_unique_filename(base_path: Path, filename: str, 
                            paper_id: Optional[str] = None) -> Path:
-    """生成唯一的文件名，避免冲突
+    """Generate unique filename to avoid conflicts
     
     Args:
-        base_path: 基础路径
-        filename: 原始文件名
-        paper_id: 论文ID，用于生成唯一后缀
+        base_path: Base path
+        filename: Original filename
+        paper_id: Paper ID, used to generate unique suffix
     
     Returns:
-        唯一的文件路径
+        Unique file path
     """
     filepath = base_path / filename
     
-    # 如果文件不存在，直接返回
+    # If file doesn't exist, return directly
     if not filepath.exists():
         return filepath
     
-    # 如果提供了paper_id，使用它作为后缀
+    # If paper_id is provided, use it as suffix
     if paper_id:
         name_parts = filename.rsplit('.', 1)
         if len(name_parts) == 2:
@@ -193,7 +193,7 @@ def generate_unique_filename(base_path: Path, filename: str,
         if not new_filepath.exists():
             return new_filepath
     
-    # 使用数字后缀
+    # Use numeric suffix
     name_parts = filename.rsplit('.', 1)
     if len(name_parts) == 2:
         name, ext = name_parts

@@ -1,4 +1,4 @@
-/* 全局样式重置 */
+/* Global styles */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -18,7 +18,7 @@ html, body {
   height: 100%;
 }
 
-/* 滚动条样式 */
+/* Scrollbar styles */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -38,7 +38,7 @@ html, body {
   background: #a8a8a8;
 }
 
-/* 深色主题滚动条 */
+/* Dark theme */
 .dark ::-webkit-scrollbar-track {
   background: #2d2d2d;
 }
@@ -51,7 +51,7 @@ html, body {
   background: #6a6a6a;
 }
 
-/* 通用工具类 */
+/* Utility classes */
 .text-center {
   text-align: center;
 }
@@ -117,7 +117,7 @@ html, body {
   cursor: not-allowed;
 }
 
-/* 间距工具类 */
+/* Spacing utility classes */
 .m-0 { margin: 0; }
 .m-1 { margin: 4px; }
 .m-2 { margin: 8px; }
@@ -188,7 +188,7 @@ html, body {
 .pr-4 { padding-right: 16px; }
 .pr-5 { padding-right: 20px; }
 
-/* 颜色工具类 */
+/* Color utility classes */
 .text-primary {
   color: #409eff;
 }
@@ -233,7 +233,7 @@ html, body {
   background-color: #909399;
 }
 
-/* 字体大小工具类 */
+/* Font size utility classes */
 .text-xs {
   font-size: 12px;
 }
@@ -262,7 +262,7 @@ html, body {
   font-size: 30px;
 }
 
-/* 字体粗细工具类 */
+/* Font weight utility classes */
 .font-thin {
   font-weight: 100;
 }
@@ -291,7 +291,7 @@ html, body {
   font-weight: 800;
 }
 
-/* 圆角工具类 */
+/* Border radius utility classes */
 .rounded-none {
   border-radius: 0;
 }
@@ -320,7 +320,7 @@ html, body {
   border-radius: 50%;
 }
 
-/* 阴影工具类 */
+/* Shadow utility classes */
 .shadow-none {
   box-shadow: none;
 }
@@ -345,7 +345,7 @@ html, body {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* 过渡动画 */
+/* Transition animations */
 .transition {
   transition: all 0.3s ease;
 }
@@ -358,7 +358,7 @@ html, body {
   transition: all 0.5s ease;
 }
 
-/* 悬停效果 */
+/* Hover effects */
 .hover-scale:hover {
   transform: scale(1.05);
 }
@@ -371,7 +371,7 @@ html, body {
   opacity: 0.8;
 }
 
-/* 加载动画 */
+/* Loading animation */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -413,7 +413,7 @@ html, body {
   animation: bounce 1s infinite;
 }
 
-/* 响应式工具类 */
+/* Responsive design */
 @media (max-width: 768px) {
   .mobile-hidden {
     display: none;
@@ -434,7 +434,7 @@ html, body {
   }
 }
 
-/* 自定义组件样式 */
+/* Custom component styles */
 .card-hover {
   transition: all 0.3s ease;
   cursor: pointer;
@@ -456,7 +456,7 @@ html, body {
   background-clip: text;
 }
 
-/* 状态指示器 */
+/* Status indicators */
 .status-dot {
   display: inline-block;
   width: 8px;
@@ -481,7 +481,7 @@ html, body {
   background-color: #409eff;
 }
 
-/* 进度条样式 */
+/* Progress bar styles */
 .progress-bar {
   width: 100%;
   height: 6px;
@@ -509,7 +509,7 @@ html, body {
   background-color: #f56c6c;
 }
 
-/* 标签样式 */
+/* Tag styles */
 .tag {
   display: inline-block;
   padding: 2px 8px;
@@ -541,7 +541,7 @@ html, body {
   color: #f56c6c;
 }
 
-/* 深色主题适配 */
+/* Dark theme adaptation */
 .dark {
   color-scheme: dark;
 }
@@ -596,7 +596,7 @@ html, body {
   background-color: #93c5fd;
 }
 
-/* 打印样式 */
+/* Print styles */
 @media print {
   .no-print {
     display: none !important;
@@ -613,7 +613,7 @@ html, body {
   }
 }
 
-/* 无障碍支持 */
+/* Accessibility support */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -626,13 +626,13 @@ html, body {
   border: 0;
 }
 
-/* 焦点样式 */
+/* Focus styles */
 .focus-visible:focus {
   outline: 2px solid #409eff;
   outline-offset: 2px;
 }
 
-/* 选择文本样式 */
+/* Text selection styles */
 ::selection {
   background-color: #409eff;
   color: white;

@@ -1,105 +1,120 @@
 #!/usr/bin/env python3
 """
-将arxiv MCP服务器下载的论文移动到指定目录的脚本
+Script to move papers downloaded by arxiv MCP server to specified directory
 """
 
 import os
 import shutil
-import glob
 from pathlib import Path
+import glob
 
-def find_and_move_papers():
-    """查找并移动下载的论文到目标目录"""
+def move_papers_to_directory():
+    """Find and move downloaded papers to target directory"""
     
-    # 目标目录
-    target_dir = "~/Downloads/arxiv_papers"
+    # Target directory
+    target_dir = Path.home() / "Downloads" / "arxiv_papers"
     
-    # 可能的源目录（MCP服务器通常将文件存储在这些位置）
+    # Possible source directories (MCP server usually stores files in these locations)
     possible_source_dirs = [
-        os.path.expanduser("~/.mcp/arxiv"),
-        os.path.expanduser("~/.local/share/mcp/arxiv"),
-        "/tmp/arxiv",
-        os.path.expanduser("~/Downloads"),
-        os.getcwd()
+        Path.home() / "Downloads",
+        Path.cwd(),
+        Path.home() / ".cache" / "arxiv",
+        Path.home() / "Documents",
+        Path("/tmp"),
+        Path("/var/tmp"),
+        Path.home() / "Library" / "Caches" / "arxiv",
     ]
     
-    # 论文ID列表
+    # Paper ID list
     paper_ids = [
-        "2506.10982v1",
-        "2506.10978v1", 
-        "2506.10974v1",
-        "2506.10973v1",
-        "2506.10972v1",
-        "2506.10967v1",
-        "2506.10962v1",
-        "2506.10960v1",
-        "2506.10959v1",
-        "2506.10955v1"
+        "2412.14619",
+        "2412.14593",
+        "2412.14588",
+        "2412.14578",
+        "2412.14577",
+        "2412.14576",
+        "2412.14575",
+        "2412.14574",
+        "2412.14573",
+        "2412.14572",
+        "2412.14571",
+        "2412.14570",
+        "2412.14569",
+        "2412.14568",
+        "2412.14567"
     ]
+    
+    # Create target directory
+    target_dir.mkdir(parents=True, exist_ok=True)
+    
+    print(f"Searching and moving papers to: {target_dir}")
     
     moved_count = 0
-    
-    print(f"正在查找并移动论文到: {target_dir}")
-    
-    # 搜索每个可能的源目录
+    # Search each possible source directory
     for source_dir in possible_source_dirs:
-        if not os.path.exists(source_dir):
+        if not source_dir.exists():
             continue
             
-        print(f"\n搜索目录: {source_dir}")
+        print(f"\nSearching directory: {source_dir}")
         
-        # 查找PDF文件
+        # Find PDF files
         for paper_id in paper_ids:
-            # 尝试不同的文件名模式
+            # Try different filename patterns
             patterns = [
                 f"{paper_id}.pdf",
+                f"{paper_id}v*.pdf",
                 f"*{paper_id}*.pdf",
-                f"{paper_id.replace('v1', '')}.pdf"
+                f"{paper_id}_*.pdf",
+                f"arxiv_{paper_id}.pdf",
+                f"paper_{paper_id}.pdf"
             ]
             
+            files = []
             for pattern in patterns:
-                search_pattern = os.path.join(source_dir, "**", pattern)
-                files = glob.glob(search_pattern, recursive=True)
-                
-                for file_path in files:
-                    if os.path.isfile(file_path):
-                        filename = os.path.basename(file_path)
-                        target_path = os.path.join(target_dir, filename)
-                        
-                        try:
-                            shutil.copy2(file_path, target_path)
-                            print(f"✓ 已移动: {filename}")
+                files.extend(source_dir.glob(pattern))
+            
+            for file_path in files:
+                if file_path.is_file():
+                    filename = file_path.name
+                    target_path = target_dir / filename
+                    
+                    try:
+                        if not target_path.exists():
+                            shutil.move(str(file_path), str(target_path))
                             moved_count += 1
-                            break
-                        except Exception as e:
-                            print(f"✗ 移动失败 {filename}: {e}")
-                            
-                if files:  # 如果找到文件就跳出pattern循环
+                            print(f"✓ Moved: {filename}")
+                        else:
+                            print(f"○ Already exists: {filename}")
+                    except Exception as e:
+                        print(f"✗ Failed to move {filename}: {e}")
+                        
+                if files:  # Break out of pattern loop if files found
                     break
     
-    # 也尝试直接从当前工作目录查找
-    print("\n搜索当前目录的PDF文件...")
-    pdf_files = glob.glob("*.pdf")
-    for pdf_file in pdf_files:
-        target_path = os.path.join(target_dir, pdf_file)
-        try:
-            shutil.copy2(pdf_file, target_path)
-            print(f"✓ 已移动: {pdf_file}")
-            moved_count += 1
-        except Exception as e:
-            print(f"✗ 移动失败 {pdf_file}: {e}")
+    # Also try searching for PDF files directly from current working directory
+    print("\nSearching current directory for PDF files...")
+    for pdf_file in Path.cwd().glob("*.pdf"):
+        if pdf_file.is_file():
+            target_path = target_dir / pdf_file.name
+            try:
+                if not target_path.exists():
+                    shutil.move(str(pdf_file), str(target_path))
+                    moved_count += 1
+                    print(f"✓ Moved: {pdf_file}")
+            except Exception as e:
+                print(f"✗ Failed to move {pdf_file}: {e}")
     
-    print(f"\n总共移动了 {moved_count} 个文件到 {target_dir}")
+    print(f"\nTotal moved {moved_count} files to {target_dir}")
     
-    # 列出目标目录的内容
-    if os.path.exists(target_dir):
-        files_in_target = os.listdir(target_dir)
-        if files_in_target:
-            print(f"\n目标目录现有文件:")
-            for f in files_in_target:
-                print(f"  - {f}")
-        else:
-            print(f"\n目标目录为空")
+    # List contents of target directory
+    files_in_target = list(target_dir.glob("*.pdf"))
+    
+    if files_in_target:
+        print(f"\nCurrent files in target directory:")
+        for file_path in sorted(files_in_target):
+            print(f"  - {file_path.name}")
+    else:
+        print(f"\nTarget directory is empty")
 
 if __name__ == "__main__":
-    find_and_move_papers()
+    move_papers_to_directory()

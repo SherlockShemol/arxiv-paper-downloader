@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-异步ArXiv论文下载器
-支持高并发下载，提升下载效率
+Async ArXiv Paper Downloader
+Supports high concurrency downloads to improve download efficiency
 """
 
 import asyncio
@@ -18,15 +18,15 @@ from logger import LoggerMixin
 from utils import sanitize_filename, get_file_size_mb, generate_unique_filename
 
 class AsyncArxivDownloader(LoggerMixin):
-    """异步ArXiv论文下载器"""
+    """Async ArXiv Paper Downloader"""
     
     def __init__(self, download_dir: Optional[str] = None, 
                  max_concurrent: int = Config.MAX_CONCURRENT_DOWNLOADS):
-        """初始化异步下载器
+        """Initialize async downloader
         
         Args:
-            download_dir: 下载目录路径
-            max_concurrent: 最大并发下载数
+            download_dir: Download directory path
+            max_concurrent: Maximum concurrent downloads
         """
         self.download_dir = Config.get_download_dir(download_dir)
         self.download_dir.mkdir(parents=True, exist_ok=True)
@@ -35,10 +35,10 @@ class AsyncArxivDownloader(LoggerMixin):
         self.stats = DownloadStats()
         self.session: Optional[aiohttp.ClientSession] = None
         
-        self.log_info(f"异步下载器初始化完成，最大并发数: {max_concurrent}")
+        self.log_info(f"Async downloader initialized, max concurrent: {max_concurrent}")
     
     async def __aenter__(self):
-        """异步上下文管理器入口"""
+        """Async context manager entry"""
         connector = aiohttp.TCPConnector(
             limit=self.max_concurrent * 2,
             limit_per_host=self.max_concurrent,
@@ -61,37 +61,37 @@ class AsyncArxivDownloader(LoggerMixin):
         return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """异步上下文管理器退出"""
+        """Async context manager exit"""
         if self.session:
             await self.session.close()
     
     async def download_papers_async(self, papers: List[Paper]) -> Dict[str, Any]:
-        """异步批量下载论文
+        """Async batch download papers
         
         Args:
-            papers: 论文列表
+            papers: List of papers
         
         Returns:
-            下载结果统计
+            Download result statistics
         """
         if not self.session:
-            raise RuntimeError("请在async with语句中使用异步下载器")
+            raise RuntimeError("Please use async downloader within async with statement")
         
         start_time = time.time()
         semaphore = asyncio.Semaphore(self.max_concurrent)
         
-        self.log_info(f"开始异步下载 {len(papers)} 篇论文")
+        self.log_info(f"Starting async download of {len(papers)} papers")
         
-        # 创建下载任务
+        # Create download tasks
         tasks = [
             self._download_single_async(paper, semaphore)
             for paper in papers
         ]
         
-        # 执行所有下载任务
+        # Execute all download tasks
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # 统计结果
+        # Count results
         successful = sum(1 for r in results if r is True)
         failed = sum(1 for r in results if isinstance(r, Exception))
         skipped = len(results) - successful - failed
@@ -106,8 +106,8 @@ class AsyncArxivDownloader(LoggerMixin):
         self.stats.download_time_seconds = total_time
         
         self.log_info(
-            f"异步下载完成: 成功 {successful}, 失败 {failed}, 跳过 {skipped}, "
-            f"耗时 {total_time:.2f}秒"
+            f"Async download completed: successful {successful}, failed {failed}, skipped {skipped}, "
+            f"time taken {total_time:.2f} seconds"
         )
         
         return {
@@ -119,36 +119,36 @@ class AsyncArxivDownloader(LoggerMixin):
         }
     
     async def _download_single_async(self, paper: Paper, semaphore: asyncio.Semaphore) -> bool:
-        """异步下载单个论文
+        """Async download single paper
         
         Args:
-            paper: 论文对象
-            semaphore: 信号量控制并发
+            paper: Paper object
+            semaphore: Semaphore for concurrency control
         
         Returns:
-            下载是否成功
+            Whether download was successful
         """
         async with semaphore:
             try:
-                # 生成文件名
+                # Generate filename
                 clean_title = sanitize_filename(paper.title)
                 filename = f"{paper.id}_{clean_title}.pdf"
                 filepath = self.download_dir / filename
                 
-                # 检查文件是否已存在
+                # Check if file already exists
                 if filepath.exists():
-                    self.log_info(f"文件已存在，跳过下载: {filename}")
+                    self.log_info(f"File already exists, skipping download: {filename}")
                     return True
                 
-                # 确保文件名唯一
+                # Ensure filename is unique
                 filepath = generate_unique_filename(filepath)
                 
-                # 下载文件
+                # Download file
                 async with self.session.get(paper.pdf_url) as response:
                     if response.status == 200:
                         content = await response.read()
                         
-                        # 写入文件
+                        # Write file
                         with open(filepath, 'wb') as f:
                             f.write(content)
                         
@@ -156,7 +156,7 @@ class AsyncArxivDownloader(LoggerMixin):
                         self.stats.total_size_mb += file_size
                         
                         self.log_info(
-                            f"下载成功: {filename} ({file_size:.2f}MB)"
+                            f"Download successful: {filename} ({file_size:.2f}MB)"
                         )
                         return True
                     else:
@@ -165,9 +165,9 @@ class AsyncArxivDownloader(LoggerMixin):
                         )
             
             except Exception as e:
-                self.log_error(f"下载失败 {paper.id}: {str(e)}")
+                self.log_error(f"Download failed {paper.id}: {str(e)}")
                 
-                # 清理不完整的文件
+                # Clean up incomplete file
                 if filepath.exists():
                     try:
                         filepath.unlink()
@@ -177,14 +177,14 @@ class AsyncArxivDownloader(LoggerMixin):
                 raise e
     
     async def download_with_retry_async(self, paper: Paper, max_retries: int = 3) -> bool:
-        """带重试机制的异步下载
+        """Async download with retry mechanism
         
         Args:
-            paper: 论文对象
-            max_retries: 最大重试次数
+            paper: Paper object
+            max_retries: Maximum retry attempts
         
         Returns:
-            下载是否成功
+            Whether download was successful
         """
         for attempt in range(max_retries):
             try:
@@ -194,40 +194,40 @@ class AsyncArxivDownloader(LoggerMixin):
             except Exception as e:
                 if attempt == max_retries - 1:
                     self.log_error(
-                        f"下载失败，已重试{max_retries}次: {paper.id} - {str(e)}"
+                        f"Download failed after {max_retries} retries: {paper.id} - {str(e)}"
                     )
                     return False
                 
                 wait_time = (2 ** attempt) * Config.RETRY_DELAY_BASE
                 self.log_warning(
-                    f"下载失败，{wait_time}秒后重试 ({attempt + 1}/{max_retries}): "
+                    f"Download failed, retrying in {wait_time} seconds ({attempt + 1}/{max_retries}): "
                     f"{paper.id} - {str(e)}"
                 )
                 await asyncio.sleep(wait_time)
         
         return False
 
-# 便捷函数
+# Convenience function
 async def download_papers_async(papers: List[Paper], 
                                download_dir: Optional[str] = None,
                                max_concurrent: int = Config.MAX_CONCURRENT_DOWNLOADS) -> Dict[str, Any]:
-    """便捷的异步下载函数
+    """Convenient async download function
     
     Args:
-        papers: 论文列表
-        download_dir: 下载目录
-        max_concurrent: 最大并发数
+        papers: List of papers
+        download_dir: Download directory
+        max_concurrent: Maximum concurrent downloads
     
     Returns:
-        下载结果统计
+        Download result statistics
     """
     async with AsyncArxivDownloader(download_dir, max_concurrent) as downloader:
         return await downloader.download_papers_async(papers)
 
 if __name__ == "__main__":
-    # 示例用法
+    # Example usage
     async def main():
-        # 创建示例论文
+        # Create example papers
         papers = [
             Paper(
                 id="2301.00001",
@@ -240,9 +240,9 @@ if __name__ == "__main__":
             )
         ]
         
-        # 异步下载
+        # Async download
         result = await download_papers_async(papers)
-        print(f"下载结果: {result}")
+        print(f"Download result: {result}")
     
-    # 运行示例
+    # Run example
     asyncio.run(main())

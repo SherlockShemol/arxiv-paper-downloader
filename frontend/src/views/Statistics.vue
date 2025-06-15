@@ -1,27 +1,27 @@
 <template>
   <div class="statistics-page">
-    <!-- 时间范围选择 -->
+    <!-- Time range selection -->
     <el-card class="time-range-card" shadow="hover">
       <div class="time-range-selector">
         <div class="selector-left">
           <el-icon><DataAnalysis /></el-icon>
-          <span class="title">统计分析</span>
+          <span class="title">Statistical Analysis</span>
         </div>
         
         <div class="selector-right">
           <el-radio-group v-model="timeRange" @change="updateCharts">
-            <el-radio-button label="7d">最近7天</el-radio-button>
-            <el-radio-button label="30d">最近30天</el-radio-button>
-            <el-radio-button label="90d">最近90天</el-radio-button>
-            <el-radio-button label="1y">最近1年</el-radio-button>
+            <el-radio-button label="7d">Last 7 Days</el-radio-button>
+            <el-radio-button label="30d">Last 30 Days</el-radio-button>
+            <el-radio-button label="90d">Last 90 Days</el-radio-button>
+            <el-radio-button label="1y">Last 1 Year</el-radio-button>
           </el-radio-group>
           
           <el-date-picker
             v-model="customDateRange"
             type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            range-separator="to"
+            start-placeholder="Start Date"
+            end-placeholder="End Date"
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
             @change="handleCustomDateChange"
@@ -30,13 +30,13 @@
           
           <el-button @click="exportData" style="margin-left: 15px;">
             <el-icon><Download /></el-icon>
-            导出数据
+            Export Data
           </el-button>
         </div>
       </div>
     </el-card>
 
-    <!-- 概览统计卡片 -->
+    <!-- Statistics cards -->
     <el-row :gutter="20" class="overview-row">
       <el-col :span="6">
         <el-card class="overview-card" shadow="hover">
@@ -46,7 +46,7 @@
             </div>
             <div class="overview-info">
               <div class="overview-number">{{ overviewStats.totalDownloads }}</div>
-              <div class="overview-label">总下载量</div>
+              <div class="overview-label">Total Downloads</div>
               <div class="overview-trend" :class="overviewStats.downloadsTrend > 0 ? 'positive' : 'negative'">
                 <el-icon><CaretTop v-if="overviewStats.downloadsTrend > 0" /><CaretBottom v-else /></el-icon>
                 {{ Math.abs(overviewStats.downloadsTrend) }}%
@@ -64,7 +64,7 @@
             </div>
             <div class="overview-info">
               <div class="overview-number">{{ overviewStats.successRate }}%</div>
-              <div class="overview-label">成功率</div>
+              <div class="overview-label">Success Rate</div>
               <div class="overview-trend" :class="overviewStats.successTrend > 0 ? 'positive' : 'negative'">
                 <el-icon><CaretTop v-if="overviewStats.successTrend > 0" /><CaretBottom v-else /></el-icon>
                 {{ Math.abs(overviewStats.successTrend) }}%
@@ -82,7 +82,7 @@
             </div>
             <div class="overview-info">
               <div class="overview-number">{{ overviewStats.avgSpeed }}</div>
-              <div class="overview-label">平均速度</div>
+              <div class="overview-label">Average Speed</div>
               <div class="overview-trend" :class="overviewStats.speedTrend > 0 ? 'positive' : 'negative'">
                 <el-icon><CaretTop v-if="overviewStats.speedTrend > 0" /><CaretBottom v-else /></el-icon>
                 {{ Math.abs(overviewStats.speedTrend) }}%
@@ -100,7 +100,7 @@
             </div>
             <div class="overview-info">
               <div class="overview-number">{{ formatFileSize(overviewStats.totalSize) }}</div>
-              <div class="overview-label">存储使用</div>
+              <div class="overview-label">Storage Usage</div>
               <div class="overview-trend" :class="overviewStats.sizeTrend > 0 ? 'positive' : 'negative'">
                 <el-icon><CaretTop v-if="overviewStats.sizeTrend > 0" /><CaretBottom v-else /></el-icon>
                 {{ Math.abs(overviewStats.sizeTrend) }}%
@@ -111,21 +111,21 @@
       </el-col>
     </el-row>
 
-    <!-- 图表区域 -->
+    <!-- Chart area -->
     <el-row :gutter="20" class="charts-row">
-      <!-- 下载趋势图 -->
+      <!-- Download trend chart -->
       <el-col :span="12">
         <el-card class="chart-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><TrendCharts /></el-icon>
-              <span>下载趋势</span>
+              <span>Download Trends</span>
               <el-button-group>
                 <el-button :type="downloadChartType === 'line' ? 'primary' : ''" size="small" @click="downloadChartType = 'line'">
-                  线图
+                  Line Chart
                 </el-button>
                 <el-button :type="downloadChartType === 'bar' ? 'primary' : ''" size="small" @click="downloadChartType = 'bar'">
-                  柱图
+                  Bar Chart
                 </el-button>
               </el-button-group>
             </div>
@@ -136,13 +136,13 @@
         </el-card>
       </el-col>
       
-      <!-- 成功率统计 -->
+      <!-- Success rate statistics -->
       <el-col :span="12">
         <el-card class="chart-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><PieChart /></el-icon>
-              <span>下载状态分布</span>
+              <span>Download Status Distribution</span>
             </div>
           </template>
           <div class="chart-container">
@@ -153,13 +153,13 @@
     </el-row>
 
     <el-row :gutter="20" class="charts-row">
-      <!-- 学科分类统计 -->
+      <!-- Subject classification statistics -->
       <el-col :span="12">
         <el-card class="chart-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><DataBoard /></el-icon>
-              <span>学科分类统计</span>
+              <span>Subject Classification Statistics</span>
             </div>
           </template>
           <div class="chart-container">
@@ -168,13 +168,13 @@
         </el-card>
       </el-col>
       
-      <!-- 下载速度分布 -->
+      <!-- Download speed distribution -->
       <el-col :span="12">
         <el-card class="chart-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><Histogram /></el-icon>
-              <span>下载速度分布</span>
+              <span>Download Speed Distribution</span>
             </div>
           </template>
           <div class="chart-container">
@@ -184,37 +184,37 @@
       </el-col>
     </el-row>
 
-    <!-- 详细数据表格 -->
+    <!-- Detailed statistics table -->
     <el-card class="data-table-card" shadow="hover">
       <template #header>
         <div class="card-header">
           <el-icon><List /></el-icon>
-          <span>详细数据</span>
+          <span>Detailed Data</span>
           <el-button @click="refreshData">
             <el-icon><Refresh /></el-icon>
-            刷新
+            Refresh
           </el-button>
         </div>
       </template>
       
       <el-table :data="detailData" stripe style="width: 100%">
-        <el-table-column label="日期" prop="date" width="120" />
-        <el-table-column label="下载数量" prop="downloads" width="100" />
-        <el-table-column label="成功数量" prop="success" width="100" />
-        <el-table-column label="失败数量" prop="failed" width="100" />
-        <el-table-column label="成功率" width="100">
+        <el-table-column label="Date" prop="date" width="120" />
+        <el-table-column label="Downloads" prop="downloads" width="100" />
+        <el-table-column label="Success" prop="success" width="100" />
+        <el-table-column label="Failed" prop="failed" width="100" />
+        <el-table-column label="Success Rate" width="100">
           <template #default="{ row }">
             {{ ((row.success / row.downloads) * 100).toFixed(1) }}%
           </template>
         </el-table-column>
-        <el-table-column label="平均速度" prop="avgSpeed" width="120" />
-        <el-table-column label="总大小" width="120">
+        <el-table-column label="Avg Speed" prop="avgSpeed" width="120" />
+        <el-table-column label="Total Size" width="120">
           <template #default="{ row }">
             {{ formatFileSize(row.totalSize) }}
           </template>
         </el-table-column>
-        <el-table-column label="最热门分类" prop="topCategory" width="120" />
-        <el-table-column label="备注" prop="notes" min-width="200" />
+        <el-table-column label="Top Category" prop="topCategory" width="120" />
+        <el-table-column label="Notes" prop="notes" min-width="200" />
       </el-table>
       
       <div class="pagination-container">
@@ -245,7 +245,7 @@ import VChart from 'vue-echarts'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 
-// 注册 ECharts 组件
+// Register ECharts components
 use([
   CanvasRenderer,
   LineChart,
@@ -257,7 +257,7 @@ use([
   GridComponent
 ])
 
-// 状态变量
+// State variables
 const timeRange = ref('30d')
 const customDateRange = ref([])
 const downloadChartType = ref('line')
@@ -265,7 +265,7 @@ const currentPage = ref(1)
 const pageSize = ref(20)
 const totalRecords = ref(0)
 
-// 概览统计数据
+// Overview statistics data
 const overviewStats = reactive({
   totalDownloads: 1234,
   downloadsTrend: 12.5,
@@ -277,16 +277,16 @@ const overviewStats = reactive({
   sizeTrend: 18.7
 })
 
-// 详细数据
+// Detailed data
 const detailData = ref([])
 
-// 下载趋势图配置
+// Download trend chart configuration
 const downloadTrendOption = computed(() => {
   const dates = []
   const downloads = []
   const success = []
   
-  // 生成模拟数据
+  // Generate mock data
   for (let i = 29; i >= 0; i--) {
     const date = dayjs().subtract(i, 'day')
     dates.push(date.format('MM-DD'))
@@ -302,7 +302,7 @@ const downloadTrendOption = computed(() => {
       }
     },
     legend: {
-      data: ['总下载', '成功下载']
+      data: ['Total Downloads', 'Successful Downloads']
     },
     grid: {
       left: '3%',
@@ -319,7 +319,7 @@ const downloadTrendOption = computed(() => {
     },
     series: [
       {
-        name: '总下载',
+        name: 'Total Downloads',
         type: downloadChartType.value,
         data: downloads,
         itemStyle: {
@@ -327,7 +327,7 @@ const downloadTrendOption = computed(() => {
         }
       },
       {
-        name: '成功下载',
+        name: 'Successful Downloads',
         type: downloadChartType.value,
         data: success,
         itemStyle: {
@@ -338,7 +338,7 @@ const downloadTrendOption = computed(() => {
   }
 })
 
-// 状态分布图配置
+// Status distribution chart configuration
 const statusDistributionOption = computed(() => {
   return {
     tooltip: {
@@ -351,13 +351,13 @@ const statusDistributionOption = computed(() => {
     },
     series: [
       {
-        name: '下载状态',
+        name: 'Download Status',
         type: 'pie',
         radius: '50%',
         data: [
-          { value: 890, name: '成功', itemStyle: { color: '#67C23A' } },
-          { value: 234, name: '失败', itemStyle: { color: '#F56C6C' } },
-          { value: 110, name: '进行中', itemStyle: { color: '#409EFF' } }
+          { value: 890, name: 'Success', itemStyle: { color: '#67C23A' } },
+          { value: 234, name: 'Failed', itemStyle: { color: '#F56C6C' } },
+          { value: 110, name: 'In Progress', itemStyle: { color: '#409EFF' } }
         ],
         emphasis: {
           itemStyle: {
@@ -371,7 +371,7 @@ const statusDistributionOption = computed(() => {
   }
 })
 
-// 学科分类统计配置
+// Subject classification statistics configuration
 const categoryStatsOption = computed(() => {
   return {
     tooltip: {
@@ -391,11 +391,11 @@ const categoryStatsOption = computed(() => {
     },
     yAxis: {
       type: 'category',
-      data: ['计算机科学', '数学', '物理', '统计学', '生物学', '经济学']
+      data: ['Computer Science', 'Mathematics', 'Physics', 'Statistics', 'Biology', 'Economics']
     },
     series: [
       {
-        name: '下载数量',
+        name: 'Download Count',
         type: 'bar',
         data: [520, 332, 301, 234, 190, 130],
         itemStyle: {
@@ -406,7 +406,7 @@ const categoryStatsOption = computed(() => {
   }
 })
 
-// 下载速度分布配置
+// Download speed distribution configuration
 const speedDistributionOption = computed(() => {
   return {
     tooltip: {
@@ -430,7 +430,7 @@ const speedDistributionOption = computed(() => {
     },
     series: [
       {
-        name: '下载次数',
+        name: 'Download Count',
         type: 'bar',
         data: [45, 123, 234, 345, 189, 67],
         itemStyle: {
@@ -441,7 +441,7 @@ const speedDistributionOption = computed(() => {
   }
 })
 
-// 格式化文件大小
+// Format file size
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 B'
   const k = 1024
@@ -450,33 +450,33 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// 更新图表
+// Update charts
 const updateCharts = () => {
-  ElMessage.success(`已切换到${timeRange.value === '7d' ? '最近7天' : timeRange.value === '30d' ? '最近30天' : timeRange.value === '90d' ? '最近90天' : '最近1年'}的数据`)
+  ElMessage.success(`Switched to ${timeRange.value === '7d' ? 'last 7 days' : timeRange.value === '30d' ? 'last 30 days' : timeRange.value === '90d' ? 'last 90 days' : 'last year'} data`)
   loadDetailData()
 }
 
-// 处理自定义日期范围变化
+// Handle custom date range changes
 const handleCustomDateChange = (dates) => {
   if (dates && dates.length === 2) {
     timeRange.value = 'custom'
-    ElMessage.success(`已切换到自定义时间范围: ${dates[0]} 至 ${dates[1]}`)
+    ElMessage.success(`Switched to custom time range: ${dates[0]} to ${dates[1]}`)
     loadDetailData()
   }
 }
 
-// 导出数据
+// Export data
 const exportData = () => {
-  ElMessage.success('数据导出功能开发中...')
+  ElMessage.success('Data export feature under development...')
 }
 
-// 刷新数据
+// Refresh data
 const refreshData = () => {
   loadDetailData()
-  ElMessage.success('数据已刷新')
+  ElMessage.success('Data refreshed')
 }
 
-// 加载详细数据
+// Load detailed data
 const loadDetailData = () => {
   const data = []
   for (let i = 29; i >= 0; i--) {
@@ -493,7 +493,7 @@ const loadDetailData = () => {
       avgSpeed: (Math.random() * 5 + 0.5).toFixed(1) + ' MB/s',
       totalSize: Math.floor(Math.random() * 1000000000) + 100000000,
       topCategory: ['cs.LG', 'math.ST', 'physics.AI', 'stat.ML'][Math.floor(Math.random() * 4)],
-      notes: i === 0 ? '今日数据' : i === 1 ? '昨日数据' : ''
+      notes: i === 0 ? 'Today\'s data' : i === 1 ? 'Yesterday\'s data' : ''
     })
   }
   
@@ -626,7 +626,7 @@ onMounted(() => {
   margin-top: 20px;
 }
 
-/* 暗色主题适配 */
+/* Dark theme adaptation */
 :global(.dark) .overview-number {
   color: #e5eaf3;
 }

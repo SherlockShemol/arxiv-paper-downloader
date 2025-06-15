@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vue测试页面</title>
+    <title>Vue Test Page</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
     <div id="app">
-        <div id="loading" style="color: blue;">正在加载...</div>
+        <div id="loading" style="color: blue;">Loading...</div>
     </div>
     
     <script>
-        console.log('测试页面开始加载')
+        console.log('Test page started loading')
         
         const { createApp } = Vue
         
@@ -24,28 +24,28 @@
                 }
             },
             mounted() {
-                console.log('Vue组件已挂载')
+                console.log('Vue component mounted')
                 this.loaded = true
-                // 移除loading
+                // Remove loading
                 const loading = document.getElementById('loading')
                 if (loading) {
                     loading.remove()
-                    console.log('loading元素已移除')
+                    console.log('Loading element removed')
                 }
             },
             template: `
                 <div>
                     <h1>{{ message }}</h1>
-                    <p v-if="loaded">Vue应用已成功加载!</p>
+                    <p v-if="loaded">Vue application loaded successfully!</p>
                 </div>
             `
         })
         
         try {
             app.mount('#app')
-            console.log('Vue应用挂载成功')
+            console.log('Vue application mounted successfully')
         } catch (error) {
-            console.error('Vue应用挂载失败:', error)
+            console.error('Vue application mount failed:', error)
         }
     </script>
 </body>

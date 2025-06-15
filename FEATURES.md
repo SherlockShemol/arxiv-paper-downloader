@@ -1,181 +1,181 @@
-# ArXiv论文下载器 - 功能特性
+# ArXiv Paper Downloader - Features
 
-## 核心功能
+## Core Features
 
-### 1. 智能下载系统
-- **智能文件命名**: 自动清理文件名中的特殊字符
-- **时间戳防覆盖**: 避免重复下载相同文件
-- **批量下载**: 支持批量搜索和下载论文
-- **错误处理**: 完善的异常处理和重试机制
+### 1. Intelligent Download System
+- **Smart File Naming**: Automatically clean special characters in filenames
+- **Timestamp Anti-Overwrite**: Avoid duplicate downloads of the same file
+- **Batch Download**: Support batch search and download of papers
+- **Error Handling**: Comprehensive exception handling and retry mechanism
 
-### 2. 异步下载器 (`async_downloader.py`)
-- **高并发下载**: 支持同时下载多篇论文
-- **异步上下文管理**: 自动管理HTTP会话
-- **进度跟踪**: 实时显示下载进度
-- **资源管理**: 自动清理网络资源
+### 2. Async Downloader (`async_downloader.py`)
+- **High Concurrency Download**: Support simultaneous download of multiple papers
+- **Async Context Management**: Automatically manage HTTP sessions
+- **Progress Tracking**: Real-time download progress display
+- **Resource Management**: Automatic cleanup of network resources
 
 ```python
-# 使用示例
+# Usage example
 from async_downloader import download_papers_async
 
-papers = [...]  # 论文列表
+papers = [...]  # Paper list
 result = await download_papers_async(papers, download_dir="./downloads", max_concurrent=5)
-print(f"成功下载: {result['successful']} 篇")
+print(f"Successfully downloaded: {result['successful']} papers")
 ```
 
-### 3. 插件系统 (`plugins.py`)
+### 3. Plugin System (`plugins.py`)
 
-#### 可用插件:
-- **DuplicateCheckPlugin**: 重复文件检查
-- **CategoryFilterPlugin**: 按分类过滤论文
-- **MetadataPlugin**: 保存论文元数据
-- **StatisticsPlugin**: 下载统计分析
+#### Available Plugins:
+- **DuplicateCheckPlugin**: Duplicate file checking
+- **CategoryFilterPlugin**: Filter papers by category
+- **MetadataPlugin**: Save paper metadata
+- **StatisticsPlugin**: Download statistics analysis
 
 ```python
-# 使用示例
+# Usage example
 from plugins import create_default_plugins
 
 manager = create_default_plugins("./downloads")
-# 插件会自动在下载前后执行相应操作
+# Plugins will automatically execute corresponding operations before and after download
 ```
 
-### 4. 命令行界面 (`cli.py`)
+### 4. Command Line Interface (`cli.py`)
 
 ```bash
-# 基本搜索和下载
+# Basic search and download
 python cli.py --query "machine learning" --max-results 10
 
-# 异步下载（更快）
+# Async download (faster)
 python cli.py --query "deep learning" --async --max-concurrent 5
 
-# 按分类过滤
+# Filter by category
 python cli.py --query "AI" --categories "cs.AI,cs.LG" --date-from 2023-01-01
 
-# 自定义下载目录
+# Custom download directory
 python cli.py --query "neural networks" --download-dir "./my_papers"
 
-# 启用特定插件
+# Enable specific plugins
 python cli.py --query "computer vision" --enable-plugins "duplicate_check,metadata"
 ```
 
-### 5. 数据模型增强 (`models.py`)
-- **数据验证**: 自动验证论文数据完整性
-- **类型提示**: 完整的类型注解支持
-- **异常处理**: 专门的异常类型
+### 5. Enhanced Data Models (`models.py`)
+- **Data Validation**: Automatically validate paper data integrity
+- **Type Hints**: Complete type annotation support
+- **Exception Handling**: Specialized exception types
 
-### 6. 配置管理 (`config.py`)
-- **集中配置**: 所有配置项统一管理
-- **环境适配**: 自动适配不同操作系统
-- **路径管理**: 智能路径处理
+### 6. Configuration Management (`config.py`)
+- **Centralized Configuration**: Unified management of all configuration items
+- **Environment Adaptation**: Automatically adapt to different operating systems
+- **Path Management**: Intelligent path processing
 
-### 7. 缓存系统 (`cache.py`)
-- **搜索结果缓存**: 避免重复API调用
-- **智能过期**: 基于时间的缓存过期
-- **存储优化**: 高效的JSON存储
+### 7. Cache System (`cache.py`)
+- **Search Result Caching**: Avoid duplicate API calls
+- **Smart Expiration**: Time-based cache expiration
+- **Storage Optimization**: Efficient JSON storage
 
-### 8. 日志系统 (`logger.py`)
-- **多级日志**: 支持DEBUG、INFO、WARNING、ERROR级别
-- **文件日志**: 自动保存到日志文件
-- **格式化输出**: 清晰的日志格式
+### 8. Logging System (`logger.py`)
+- **Multi-level Logging**: Support DEBUG, INFO, WARNING, ERROR levels
+- **File Logging**: Automatically save to log files
+- **Formatted Output**: Clear log format
 
-### 9. 工具函数 (`utils.py`)
-- **文件名清理**: 自动处理特殊字符
-- **哈希生成**: 查询结果哈希
-- **路径处理**: 跨平台路径操作
+### 9. Utility Functions (`utils.py`)
+- **Filename Cleaning**: Automatically handle special characters
+- **Hash Generation**: Query result hashing
+- **Path Processing**: Cross-platform path operations
 
-## 高级特性
+## Advanced Features
 
-### 1. 并发控制
-- 同步下载器：线程池控制
-- 异步下载器：协程并发控制
-- 资源限制：防止系统过载
+### 1. Concurrency Control
+- Sync downloader: Thread pool control
+- Async downloader: Coroutine concurrency control
+- Resource limits: Prevent system overload
 
-### 2. 错误恢复
-- 网络错误重试
-- 部分失败继续
-- 详细错误报告
+### 2. Error Recovery
+- Network error retry
+- Continue on partial failure
+- Detailed error reporting
 
-### 3. 性能优化
-- 缓存机制减少API调用
-- 异步I/O提高下载速度
-- 内存优化避免大文件问题
+### 3. Performance Optimization
+- Cache mechanism reduces API calls
+- Async I/O improves download speed
+- Memory optimization avoids large file issues
 
-### 4. 扩展性
-- 插件架构支持自定义功能
-- 配置系统支持个性化设置
-- 模块化设计便于维护
+### 4. Extensibility
+- Plugin architecture supports custom functionality
+- Configuration system supports personalized settings
+- Modular design facilitates maintenance
 
-## 测试覆盖
+## Test Coverage
 
-### 测试文件:
-- `test_arxiv_downloader.py`: 核心功能测试
-- `test_enhanced_features.py`: 增强功能测试
+### Test Files:
+- `test_arxiv_downloader.py`: Core functionality tests
+- `test_enhanced_features.py`: Enhanced feature tests
 
-### 测试覆盖范围:
-- 数据验证测试
-- 异步下载测试
-- 插件系统测试
-- 配置管理测试
-- 错误处理测试
+### Test Coverage Areas:
+- Data validation tests
+- Async download tests
+- Plugin system tests
+- Configuration management tests
+- Error handling tests
 
-## 部署和分发
+## Deployment and Distribution
 
-### 安装依赖
+### Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 开发环境设置
+### Development Environment Setup
 ```bash
-# 安装开发依赖
+# Install development dependencies
 pip install -r requirements.txt
 
-# 运行测试
+# Run tests
 python -m pytest -v
 
-# 代码格式化
+# Code formatting
 black .
 
-# 类型检查
+# Type checking
 mypy .
 ```
 
-### 打包安装
+### Package Installation
 ```bash
-# 构建包
+# Build package
 python setup.py sdist bdist_wheel
 
-# 安装
+# Install
 pip install .
 ```
 
-## 使用建议
+## Usage Recommendations
 
-### 1. 日常使用
-- 使用CLI进行快速搜索下载
-- 启用缓存提高重复查询速度
-- 使用异步模式提高下载效率
+### 1. Daily Use
+- Use CLI for quick search and download
+- Enable caching to improve repeated query speed
+- Use async mode to improve download efficiency
 
-### 2. 批量处理
-- 使用异步下载器处理大量论文
-- 启用重复检查插件避免重复下载
-- 使用统计插件跟踪下载情况
+### 2. Batch Processing
+- Use async downloader to handle large volumes of papers
+- Enable duplicate check plugin to avoid duplicate downloads
+- Use statistics plugin to track download status
 
-### 3. 自定义需求
-- 开发自定义插件扩展功能
-- 修改配置文件适应特定需求
-- 使用API进行程序化集成
+### 3. Custom Requirements
+- Develop custom plugins to extend functionality
+- Modify configuration files to adapt to specific needs
+- Use API for programmatic integration
 
-## 性能指标
+## Performance Metrics
 
-- **同步下载**: ~2-5篇/分钟
-- **异步下载**: ~10-20篇/分钟（取决于并发数）
-- **缓存命中**: 减少90%的API调用
-- **内存使用**: <100MB（正常使用）
+- **Sync Download**: ~2-5 papers/minute
+- **Async Download**: ~10-20 papers/minute (depends on concurrency)
+- **Cache Hit**: Reduces 90% of API calls
+- **Memory Usage**: <100MB (normal usage)
 
-## 兼容性
+## Compatibility
 
-- **Python版本**: 3.7+
-- **操作系统**: Windows, macOS, Linux
-- **依赖**: 最小化外部依赖
-- **网络**: 支持代理和超时设置
+- **Python Version**: 3.7+
+- **Operating System**: Windows, macOS, Linux
+- **Dependencies**: Minimized external dependencies
+- **Network**: Supports proxy and timeout settings

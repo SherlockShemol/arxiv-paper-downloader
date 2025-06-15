@@ -1,146 +1,146 @@
-# ArXiv 论文下载器 - 前端界面
+# ArXiv Paper Downloader - Frontend Interface
 
-这是 ArXiv 论文下载器的 Vue.js 前端界面，提供了直观易用的网页操作界面。
+This is the Vue.js frontend interface for the ArXiv Paper Downloader, providing an intuitive and user-friendly web interface.
 
-## 功能特性
+## Features
 
-### 🔍 智能搜索
-- 关键词搜索论文
-- 高级筛选选项（学科分类、日期范围、排序方式）
-- 搜索历史记录
-- 自动补全建议
-- 热门搜索推荐
+### 🔍 Intelligent Search
+- Keyword-based paper search
+- Advanced filtering options (subject categories, date range, sorting)
+- Search history
+- Auto-completion suggestions
+- Popular search recommendations
 
-### 📥 下载管理
-- 单个/批量下载论文
-- 实时下载进度显示
-- 下载队列管理
-- 暂停/恢复/取消下载
-- 下载状态监控
+### 📥 Download Management
+- Single/batch paper downloads
+- Real-time download progress display
+- Download queue management
+- Pause/resume/cancel downloads
+- Download status monitoring
 
-### 📊 统计分析
-- 下载趋势图表
-- 学科分类统计
-- 下载速度分布
-- 成功率分析
-- 数据导出功能
+### 📊 Statistical Analysis
+- Download trend charts
+- Subject category statistics
+- Download speed distribution
+- Success rate analysis
+- Data export functionality
 
-### ⚙️ 系统设置
-- 下载参数配置
-- 界面主题切换
-- 语言设置
-- 高级选项配置
-- 设置导入/导出
+### ⚙️ System Settings
+- Download parameter configuration
+- Interface theme switching
+- Language settings
+- Advanced option configuration
+- Settings import/export
 
-### 🎨 界面特性
-- 响应式设计，支持移动端
-- 深色/浅色主题切换
-- 现代化 UI 设计
-- 流畅的动画效果
-- 无障碍支持
+### 🎨 Interface Features
+- Responsive design with mobile support
+- Dark/light theme switching
+- Modern UI design
+- Smooth animations
+- Accessibility support
 
-## 技术栈
+## Tech Stack
 
-- **框架**: Vue 3 + Composition API
-- **构建工具**: Vite
-- **UI 组件库**: Element Plus
-- **图表库**: Apache ECharts (vue-echarts)
-- **HTTP 客户端**: Axios
-- **路由**: Vue Router
-- **样式**: CSS3 + Sass
-- **图标**: Element Plus Icons
-- **日期处理**: Day.js
+- **Framework**: Vue 3 + Composition API
+- **Build Tool**: Vite
+- **UI Component Library**: Element Plus
+- **Chart Library**: Apache ECharts (vue-echarts)
+- **HTTP Client**: Axios
+- **Router**: Vue Router
+- **Styling**: CSS3 + Sass
+- **Icons**: Element Plus Icons
+- **Date Processing**: Day.js
 
-## 项目结构
+## Project Structure
 
 ```
 frontend/
-├── public/                 # 静态资源
+├── public/                 # Static assets
 ├── src/
-│   ├── api/               # API 接口
-│   │   └── index.js       # API 服务
-│   ├── components/        # 公共组件
-│   ├── views/             # 页面组件
-│   │   ├── Home.vue       # 首页
-│   │   ├── Search.vue     # 搜索页面
-│   │   ├── Downloads.vue  # 下载管理
-│   │   ├── Statistics.vue # 统计分析
-│   │   └── Settings.vue   # 系统设置
-│   ├── styles/            # 样式文件
-│   │   └── global.css     # 全局样式
-│   ├── App.vue            # 根组件
-│   └── main.js            # 入口文件
-├── index.html             # HTML 模板
-├── package.json           # 项目配置
-├── vite.config.js         # Vite 配置
-└── README.md              # 项目说明
+│   ├── api/               # API interfaces
+│   │   └── index.js       # API services
+│   ├── components/        # Common components
+│   ├── views/             # Page components
+│   │   ├── Home.vue       # Home page
+│   │   ├── Search.vue     # Search page
+│   │   ├── Downloads.vue  # Download management
+│   │   ├── Statistics.vue # Statistical analysis
+│   │   └── Settings.vue   # System settings
+│   ├── styles/            # Style files
+│   │   └── global.css     # Global styles
+│   ├── App.vue            # Root component
+│   └── main.js            # Entry file
+├── index.html             # HTML template
+├── package.json           # Project configuration
+├── vite.config.js         # Vite configuration
+└── README.md              # Project documentation
 ```
 
-## 安装和运行
+## Installation and Running
 
-### 环境要求
+### Requirements
 
 - Node.js >= 16.0.0
-- npm >= 8.0.0 或 yarn >= 1.22.0
+- npm >= 8.0.0 or yarn >= 1.22.0
 
-### 安装依赖
+### Install Dependencies
 
 ```bash
-# 进入前端目录
+# Enter frontend directory
 cd frontend
 
-# 使用 npm 安装
+# Install with npm
 npm install
 
-# 或使用 yarn 安装
+# Or install with yarn
 yarn install
 ```
 
-### 开发模式
+### Development Mode
 
 ```bash
-# 启动开发服务器
+# Start development server
 npm run dev
 
-# 或使用 yarn
+# Or with yarn
 yarn dev
 ```
 
-开发服务器将在 `http://localhost:3000` 启动。
+The development server will start at `http://localhost:3000`.
 
-### 生产构建
+### Production Build
 
 ```bash
-# 构建生产版本
+# Build for production
 npm run build
 
-# 或使用 yarn
+# Or with yarn
 yarn build
 ```
 
-构建文件将输出到 `dist` 目录。
+Build files will be output to the `dist` directory.
 
-### 预览生产版本
+### Preview Production Build
 
 ```bash
-# 预览构建结果
+# Preview build results
 npm run preview
 
-# 或使用 yarn
+# Or with yarn
 yarn preview
 ```
 
-## 配置说明
+## Configuration
 
-### API 配置
+### API Configuration
 
-前端通过 `/api` 路径代理到后端服务。在 `vite.config.js` 中配置代理：
+The frontend proxies to the backend service through the `/api` path. Configure the proxy in `vite.config.js`:
 
 ```javascript
 server: {
   proxy: {
     '/api': {
-      target: 'http://localhost:8000',  // 后端服务地址
+      target: 'http://localhost:8000',  // Backend service address
       changeOrigin: true,
       rewrite: (path) => path.replace(/^\/api/, '')
     }
@@ -148,113 +148,113 @@ server: {
 }
 ```
 
-### 环境变量
+### Environment Variables
 
-创建 `.env.local` 文件配置环境变量：
+Create a `.env.local` file to configure environment variables:
 
 ```bash
-# API 基础地址
+# API base URL
 VITE_API_BASE_URL=http://localhost:8000
 
-# WebSocket 地址
+# WebSocket URL
 VITE_WS_URL=ws://localhost:8000/ws
 
-# 应用标题
-VITE_APP_TITLE=ArXiv 论文下载器
+# Application title
+VITE_APP_TITLE=ArXiv Paper Downloader
 ```
 
-## API 接口
+## API Interfaces
 
-前端与后端通过 RESTful API 和 WebSocket 进行通信：
+The frontend communicates with the backend through RESTful API and WebSocket:
 
 ### RESTful API
 
-- `GET /api/papers/search` - 搜索论文
-- `POST /api/papers/download` - 下载论文
-- `GET /api/downloads` - 获取下载列表
-- `GET /api/statistics` - 获取统计数据
-- `GET /api/settings` - 获取系统设置
-- `POST /api/settings` - 保存系统设置
+- `GET /api/papers/search` - Search papers
+- `POST /api/papers/download` - Download papers
+- `GET /api/downloads` - Get download list
+- `GET /api/statistics` - Get statistics data
+- `GET /api/settings` - Get system settings
+- `POST /api/settings` - Save system settings
 
 ### WebSocket
 
-- 实时下载进度更新
-- 下载状态变化通知
-- 系统状态监控
+- Real-time download progress updates
+- Download status change notifications
+- System status monitoring
 
-## 开发指南
+## Development Guide
 
-### 代码规范
+### Code Standards
 
-- 使用 Vue 3 Composition API
-- 组件命名采用 PascalCase
-- 文件命名采用 kebab-case
-- 使用 ESLint 进行代码检查
-- 使用 Prettier 进行代码格式化
+- Use Vue 3 Composition API
+- Component naming uses PascalCase
+- File naming uses kebab-case
+- Use ESLint for code linting
+- Use Prettier for code formatting
 
-### 组件开发
+### Component Development
 
 ```vue
 <template>
   <div class="component-name">
-    <!-- 模板内容 -->
+    <!-- Template content -->
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 
-// 响应式数据
+// Reactive data
 const data = ref('')
 const state = reactive({})
 
-// 计算属性
+// Computed properties
 const computedValue = computed(() => {
-  // 计算逻辑
+  // Computation logic
 })
 
-// 生命周期
+// Lifecycle
 onMounted(() => {
-  // 初始化逻辑
+  // Initialization logic
 })
 </script>
 
 <style scoped>
 .component-name {
-  /* 组件样式 */
+  /* Component styles */
 }
 </style>
 ```
 
-### 状态管理
+### State Management
 
-项目使用 Vue 3 的 Composition API 进行状态管理，对于复杂的全局状态可以考虑使用 Pinia。
+The project uses Vue 3's Composition API for state management. For complex global state, consider using Pinia.
 
-### 主题切换
+### Theme Switching
 
-支持深色/浅色主题切换，通过 CSS 变量和类名控制：
+Supports dark/light theme switching, controlled through CSS variables and class names:
 
 ```css
-/* 浅色主题 */
+/* Light theme */
 :root {
   --color-bg: #ffffff;
   --color-text: #303133;
 }
 
-/* 深色主题 */
+/* Dark theme */
 .dark {
   --color-bg: #1a1a1a;
   --color-text: #e5eaf3;
 }
 ```
 
-## 部署
+## Deployment
 
-### 静态部署
+### Static Deployment
 
-构建完成后，将 `dist` 目录部署到静态文件服务器（如 Nginx、Apache）。
+After building, deploy the `dist` directory to a static file server (such as Nginx, Apache).
 
-### Nginx 配置示例
+### Nginx Configuration Example
 
 ```nginx
 server {
@@ -263,19 +263,19 @@ server {
     root /path/to/dist;
     index index.html;
     
-    # 处理 Vue Router 的 history 模式
+    # Handle Vue Router history mode
     location / {
         try_files $uri $uri/ /index.html;
     }
     
-    # API 代理
+    # API proxy
     location /api/ {
         proxy_pass http://backend-server:8000/;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
     
-    # WebSocket 代理
+    # WebSocket proxy
     location /ws {
         proxy_pass http://backend-server:8000/ws;
         proxy_http_version 1.1;
@@ -285,10 +285,10 @@ server {
 }
 ```
 
-### Docker 部署
+### Docker Deployment
 
 ```dockerfile
-# 构建阶段
+# Build stage
 FROM node:16-alpine as build
 WORKDIR /app
 COPY package*.json ./
@@ -296,7 +296,7 @@ RUN npm ci --only=production
 COPY . .
 RUN npm run build
 
-# 生产阶段
+# Production stage
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
@@ -304,56 +304,56 @@ EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
-## 故障排除
+## Troubleshooting
 
-### 常见问题
+### Common Issues
 
-1. **端口冲突**
-   - 修改 `vite.config.js` 中的端口配置
-   - 或使用 `npm run dev -- --port 3001`
+1. **Port Conflicts**
+   - Modify port configuration in `vite.config.js`
+   - Or use `npm run dev -- --port 3001`
 
-2. **API 请求失败**
-   - 检查后端服务是否启动
-   - 确认代理配置是否正确
-   - 查看浏览器控制台错误信息
+2. **API Request Failures**
+   - Check if backend service is running
+   - Confirm proxy configuration is correct
+   - Check browser console error messages
 
-3. **构建失败**
-   - 清除 node_modules 重新安装
-   - 检查 Node.js 版本是否符合要求
-   - 查看构建错误日志
+3. **Build Failures**
+   - Clear node_modules and reinstall
+   - Check if Node.js version meets requirements
+   - Review build error logs
 
-4. **样式问题**
-   - 检查 CSS 文件是否正确导入
-   - 确认主题切换逻辑是否正常
-   - 查看浏览器兼容性
+4. **Style Issues**
+   - Check if CSS files are imported correctly
+   - Confirm theme switching logic is working
+   - Check browser compatibility
 
-### 调试技巧
+### Debugging Tips
 
-- 使用 Vue DevTools 调试组件状态
-- 在浏览器控制台查看网络请求
-- 使用 `console.log` 输出调试信息
-- 检查 Vite 开发服务器日志
+- Use Vue DevTools to debug component state
+- Check network requests in browser console
+- Use `console.log` for debug output
+- Check Vite development server logs
 
-## 贡献指南
+## Contributing
 
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 创建 Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Create a Pull Request
 
-## 许可证
+## License
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](../LICENSE) 文件了解详情。
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
 
-## 联系方式
+## Contact
 
-如有问题或建议，请通过以下方式联系：
+If you have any questions or suggestions, please contact us through:
 
-- 提交 Issue
-- 发送邮件
-- 项目讨论区
+- Submit an Issue
+- Send an email
+- Project discussion forum
 
 ---
 
-感谢使用 ArXiv 论文下载器！
+Thank you for using ArXiv Paper Downloader!

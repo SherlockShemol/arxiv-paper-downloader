@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ArXiv论文下载器命令行接口
-提供友好的命令行交互体验
+ArXiv Paper Downloader Command Line Interface
+Provides friendly command line interaction experience
 """
 
 import argparse
@@ -18,12 +18,12 @@ from config import Config
 from logger import setup_logging
 
 def create_parser() -> argparse.ArgumentParser:
-    """创建命令行参数解析器"""
+    """Create command line argument parser"""
     parser = argparse.ArgumentParser(
-        description="ArXiv论文下载器 - 智能批量下载学术论文",
+        description="ArXiv Paper Downloader - Intelligent batch download of academic papers",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-示例用法:
+Example usage:
   %(prog)s --query "cat:cs.AI" --max-results 20
   %(prog)s --query "ti:transformer" --date-from 2023-01-01 --date-to 2023-12-31
   %(prog)s --query "au:hinton" --download-dir ~/Papers --async
@@ -31,103 +31,103 @@ def create_parser() -> argparse.ArgumentParser:
         """
     )
     
-    # 基本参数
+    # Basic parameters
     parser.add_argument(
         "--query", "-q",
         default=Config.DEFAULT_QUERY,
-        help=f"搜索查询 (默认: {Config.DEFAULT_QUERY})"
+        help=f"Search query (default: {Config.DEFAULT_QUERY})"
     )
     
     parser.add_argument(
         "--max-results", "-n",
         type=int,
         default=Config.DEFAULT_MAX_RESULTS,
-        help=f"最大下载数量 (默认: {Config.DEFAULT_MAX_RESULTS})"
+        help=f"Maximum download count (default: {Config.DEFAULT_MAX_RESULTS})"
     )
     
     parser.add_argument(
         "--download-dir", "-d",
         type=str,
-        help=f"下载目录 (默认: {Config.DEFAULT_DOWNLOAD_DIR})"
+        help=f"Download directory (default: {Config.DEFAULT_DOWNLOAD_DIR})"
     )
     
-    # 日期范围
+    # Date range
     parser.add_argument(
         "--date-from",
         type=str,
-        help="开始日期 (格式: YYYY-MM-DD)"
+        help="Start date (format: YYYY-MM-DD)"
     )
     
     parser.add_argument(
         "--date-to",
         type=str,
-        help="结束日期 (格式: YYYY-MM-DD)"
+        help="End date (format: YYYY-MM-DD)"
     )
     
-    # 分类过滤
+    # Category filtering
     parser.add_argument(
         "--categories",
         type=str,
-        help="允许的分类，用逗号分隔 (例如: cs.AI,cs.LG)"
+        help="Allowed categories, comma-separated (e.g.: cs.AI,cs.LG)"
     )
     
     parser.add_argument(
         "--exclude-categories",
         type=str,
-        help="排除的分类，用逗号分隔 (例如: cs.CV,cs.RO)"
+        help="Excluded categories, comma-separated (e.g.: cs.CV,cs.RO)"
     )
     
-    # 性能选项
+    # Performance options
     parser.add_argument(
         "--async",
         action="store_true",
-        help="使用异步下载 (更快)"
+        help="Use async download (faster)"
     )
     
     parser.add_argument(
         "--max-concurrent",
         type=int,
         default=Config.MAX_CONCURRENT_DOWNLOADS,
-        help=f"最大并发下载数 (默认: {Config.MAX_CONCURRENT_DOWNLOADS})"
+        help=f"Maximum concurrent downloads (default: {Config.MAX_CONCURRENT_DOWNLOADS})"
     )
     
-    # 插件选项
+    # Plugin options
     parser.add_argument(
         "--no-plugins",
         action="store_true",
-        help="禁用所有插件"
+        help="Disable all plugins"
     )
     
     parser.add_argument(
         "--no-duplicate-check",
         action="store_true",
-        help="禁用重复检查"
+        help="Disable duplicate check"
     )
     
     parser.add_argument(
         "--no-metadata",
         action="store_true",
-        help="不保存元数据"
+        help="Do not save metadata"
     )
     
-    # 日志选项
+    # Logging options
     parser.add_argument(
         "--verbose", "-v",
         action="store_true",
-        help="详细输出"
+        help="Verbose output"
     )
     
     parser.add_argument(
         "--quiet",
         action="store_true",
-        help="静默模式"
+        help="Quiet mode"
     )
     
-    # 其他选项
+    # Other options
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="仅搜索不下载"
+        help="Search only, do not download"
     )
     
     parser.add_argument(
@@ -139,7 +139,7 @@ def create_parser() -> argparse.ArgumentParser:
     return parser
 
 def setup_logging_from_args(args) -> None:
-    """根据命令行参数设置日志"""
+    """Setup logging based on command line arguments"""
     if args.quiet:
         log_level = 40  # ERROR
     elif args.verbose:
@@ -154,46 +154,46 @@ def setup_logging_from_args(args) -> None:
     )
 
 def parse_categories(categories_str: Optional[str]) -> List[str]:
-    """解析分类字符串"""
+    """Parse category string"""
     if not categories_str:
         return []
     return [cat.strip() for cat in categories_str.split(',') if cat.strip()]
 
 def print_search_results(papers, dry_run=False):
-    """打印搜索结果"""
+    """Print search results"""
     if not papers:
-        print("未找到符合条件的论文")
+        print("No papers found matching the criteria")
         return
     
-    print(f"\n找到 {len(papers)} 篇论文:")
+    print(f"\nFound {len(papers)} papers:")
     print("-" * 80)
     
     for i, paper in enumerate(papers, 1):
         print(f"{i:2d}. {paper.id} - {paper.title[:60]}...")
-        print(f"    作者: {', '.join(paper.authors[:3])}{'...' if len(paper.authors) > 3 else ''}")
-        print(f"    分类: {', '.join(paper.categories)}")
-        print(f"    发布: {paper.published}")
+        print(f"    Authors: {', '.join(paper.authors[:3])}{'...' if len(paper.authors) > 3 else ''}")
+        print(f"    Categories: {', '.join(paper.categories)}")
+        print(f"    Published: {paper.published}")
         print()
     
     if dry_run:
-        print("[试运行模式] 未执行实际下载")
+        print("[Dry run mode] No actual download performed")
 
 def main():
-    """主函数"""
+    """Main function"""
     parser = create_parser()
     args = parser.parse_args()
     
-    # 设置日志
+    # Setup logging
     setup_logging_from_args(args)
     
     try:
-        # 创建下载器
+        # Create downloader
         downloader = ArxivDownloader(args.download_dir)
         
-        # 搜索论文
-        print(f"搜索论文: {args.query}")
+        # Search papers
+        print(f"Searching papers: {args.query}")
         if args.date_from or args.date_to:
-            print(f"日期范围: {args.date_from or '不限'} 到 {args.date_to or '不限'}")
+            print(f"Date range: {args.date_from or 'unlimited'} to {args.date_to or 'unlimited'}")
         
         papers = downloader.search_papers(
             query=args.query,
@@ -202,11 +202,11 @@ def main():
             max_results=args.max_results
         )
         
-        # 设置插件
+        # Setup plugins
         if not args.no_plugins:
             plugin_manager = create_default_plugins(downloader.download_dir)
             
-            # 分类过滤插件
+            # Category filter plugin
             allowed_categories = parse_categories(args.categories)
             excluded_categories = parse_categories(args.exclude_categories)
             
@@ -217,7 +217,7 @@ def main():
                 )
                 plugin_manager.register_plugin(category_filter)
             
-            # 禁用特定插件
+            # Disable specific plugins
             if args.no_duplicate_check:
                 duplicate_plugin = plugin_manager.get_plugin("duplicate_check")
                 if duplicate_plugin:
@@ -228,7 +228,7 @@ def main():
                 if metadata_plugin:
                     metadata_plugin.disable()
             
-            # 应用插件过滤
+            # Apply plugin filtering
             filtered_papers = []
             for paper in papers:
                 if plugin_manager.pre_download_hook(paper):
@@ -236,24 +236,24 @@ def main():
             
             papers = filtered_papers
         
-        # 显示搜索结果
+        # Display search results
         print_search_results(papers, args.dry_run)
         
         if args.dry_run or not papers:
             return
         
-        # 确认下载
+        # Confirm download
         if not args.quiet:
-            response = input(f"\n是否下载这 {len(papers)} 篇论文? [y/N]: ")
-            if response.lower() not in ['y', 'yes', '是']:
-                print("取消下载")
+            response = input(f"\nDownload these {len(papers)} papers? [y/N]: ")
+            if response.lower() not in ['y', 'yes']:
+                print("Download cancelled")
                 return
         
-        # 执行下载
-        print(f"\n开始下载到: {downloader.download_dir}")
+        # Execute download
+        print(f"\nStarting download to: {downloader.download_dir}")
         
         if getattr(args, 'async'):
-            # 异步下载
+            # Async download
             result = asyncio.run(
                 download_papers_async(
                     papers, 
@@ -262,18 +262,18 @@ def main():
                 )
             )
             
-            print(f"\n下载完成!")
-            print(f"成功: {result['successful']}")
-            print(f"失败: {result['failed']}")
-            print(f"跳过: {result['skipped']}")
-            print(f"耗时: {result['total_time']:.2f}秒")
+            print(f"\nDownload completed!")
+            print(f"Successful: {result['successful']}")
+            print(f"Failed: {result['failed']}")
+            print(f"Skipped: {result['skipped']}")
+            print(f"Time taken: {result['total_time']:.2f} seconds")
         else:
-            # 同步下载
+            # Sync download
             successful = 0
             failed = 0
             
             for i, paper in enumerate(papers, 1):
-                print(f"[{i}/{len(papers)}] 下载: {paper.title[:50]}...")
+                print(f"[{i}/{len(papers)}] Downloading: {paper.title[:50]}...")
                 
                 try:
                     if downloader.download_pdf(paper.pdf_url, paper.title, paper.id):
@@ -293,16 +293,16 @@ def main():
                                 False
                             )
                 except Exception as e:
-                    print(f"下载失败: {str(e)}")
+                    print(f"Download failed: {str(e)}")
                     failed += 1
             
-            print(f"\n下载完成! 成功: {successful}, 失败: {failed}")
+            print(f"\nDownload completed! Successful: {successful}, Failed: {failed}")
     
     except KeyboardInterrupt:
-        print("\n用户中断下载")
+        print("\nUser interrupted download")
         sys.exit(1)
     except Exception as e:
-        print(f"错误: {str(e)}")
+        print(f"Error: {str(e)}")
         sys.exit(1)
 
 if __name__ == "__main__":

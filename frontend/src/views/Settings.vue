@@ -1,52 +1,52 @@
 <template>
   <div class="settings-page">
-    <!-- 页面标题 -->
+    <!-- Page title -->
     <el-card class="title-card" shadow="hover">
       <div class="title-header">
         <el-icon><Setting /></el-icon>
-        <span class="title">系统设置</span>
+        <span class="title">System Settings</span>
         <div class="title-actions">
           <el-button @click="resetToDefaults" type="warning">
             <el-icon><RefreshLeft /></el-icon>
-            恢复默认
+            Reset to Default
           </el-button>
           <el-button @click="saveSettings" type="primary">
             <el-icon><Check /></el-icon>
-            保存设置
+            Save Settings
           </el-button>
         </div>
       </div>
     </el-card>
 
     <el-row :gutter="20">
-      <!-- 左侧设置面板 -->
+      <!-- Left settings panel -->
       <el-col :span="18">
-        <!-- 下载设置 -->
+        <!-- Download settings -->
         <el-card class="settings-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><Download /></el-icon>
-              <span>下载设置</span>
+              <span>Download Settings</span>
             </div>
           </template>
           
           <el-form :model="downloadSettings" label-width="140px" label-position="left">
-            <el-form-item label="默认下载目录">
+            <el-form-item label="Default Download Directory">
               <el-input
                 v-model="downloadSettings.downloadDir"
-                placeholder="请选择下载目录"
+                placeholder="Please select download directory"
                 readonly
               >
                 <template #append>
                   <el-button @click="selectDownloadDir">
                     <el-icon><FolderOpened /></el-icon>
-                    选择
+                    Select
                   </el-button>
                 </template>
               </el-input>
             </el-form-item>
             
-            <el-form-item label="最大并发下载数">
+            <el-form-item label="Max Concurrent Downloads">
               <el-slider
                 v-model="downloadSettings.maxConcurrent"
                 :min="1"
@@ -58,7 +58,7 @@
               />
             </el-form-item>
             
-            <el-form-item label="下载重试次数">
+            <el-form-item label="Download Retry Count">
               <el-input-number
                 v-model="downloadSettings.retryCount"
                 :min="0"
@@ -68,7 +68,7 @@
               />
             </el-form-item>
             
-            <el-form-item label="连接超时时间">
+            <el-form-item label="Connection Timeout">
               <el-input-number
                 v-model="downloadSettings.timeout"
                 :min="5"
@@ -76,41 +76,41 @@
                 :step="5"
                 style="width: 150px;"
               />
-              <span style="margin-left: 10px; color: #909399;">秒</span>
+              <span style="margin-left: 10px; color: #909399;">seconds</span>
             </el-form-item>
             
-            <el-form-item label="自动重命名">
+            <el-form-item label="Auto Rename">
               <el-switch
                 v-model="downloadSettings.autoRename"
-                active-text="启用"
-                inactive-text="禁用"
+                active-text="Enable"
+                inactive-text="Disable"
               />
               <div class="setting-description">
-                当文件名冲突时自动添加序号
+                Automatically add sequence number when filename conflicts
               </div>
             </el-form-item>
             
-            <el-form-item label="下载完成提醒">
+            <el-form-item label="Download Completion Notification">
               <el-switch
                 v-model="downloadSettings.notification"
-                active-text="启用"
-                inactive-text="禁用"
+                active-text="Enable"
+                inactive-text="Disable"
               />
             </el-form-item>
           </el-form>
         </el-card>
 
-        <!-- 搜索设置 -->
+        <!-- Search Settings -->
         <el-card class="settings-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><Search /></el-icon>
-              <span>搜索设置</span>
+              <span>Search Settings</span>
             </div>
           </template>
           
           <el-form :model="searchSettings" label-width="140px" label-position="left">
-            <el-form-item label="默认搜索结果数">
+            <el-form-item label="Default Search Results">
               <el-input-number
                 v-model="searchSettings.defaultMaxResults"
                 :min="1"
@@ -120,84 +120,84 @@
               />
             </el-form-item>
             
-            <el-form-item label="默认排序方式">
+            <el-form-item label="Default Sort Order">
               <el-select v-model="searchSettings.defaultSortBy" style="width: 200px;">
-                <el-option label="相关性" value="relevance" />
-                <el-option label="提交日期" value="submittedDate" />
-                <el-option label="最后更新" value="lastUpdatedDate" />
+                <el-option label="Relevance" value="relevance" />
+                <el-option label="Submission Date" value="submittedDate" />
+                <el-option label="Last Updated" value="lastUpdatedDate" />
               </el-select>
             </el-form-item>
             
-            <el-form-item label="默认学科分类">
+            <el-form-item label="Default Categories">
               <el-select
                 v-model="searchSettings.defaultCategories"
                 multiple
-                placeholder="请选择默认学科分类"
+                placeholder="Please select default categories"
                 style="width: 300px;"
               >
-                <el-option label="计算机科学" value="cs" />
-                <el-option label="数学" value="math" />
-                <el-option label="物理" value="physics" />
-                <el-option label="统计学" value="stat" />
-                <el-option label="生物学" value="q-bio" />
-                <el-option label="经济学" value="econ" />
+                <el-option label="Computer Science" value="cs" />
+                <el-option label="Mathematics" value="math" />
+                <el-option label="Physics" value="physics" />
+                <el-option label="Statistics" value="stat" />
+                <el-option label="Biology" value="q-bio" />
+                <el-option label="Economics" value="econ" />
               </el-select>
             </el-form-item>
             
-            <el-form-item label="搜索历史保存">
+            <el-form-item label="Save Search History">
               <el-switch
                 v-model="searchSettings.saveHistory"
-                active-text="启用"
-                inactive-text="禁用"
+                active-text="Enable"
+                inactive-text="Disable"
               />
               <div class="setting-description">
-                保存搜索关键词历史记录
+                Save search keyword history
               </div>
             </el-form-item>
             
-            <el-form-item label="自动补全">
+            <el-form-item label="Auto Complete">
               <el-switch
                 v-model="searchSettings.autoComplete"
-                active-text="启用"
-                inactive-text="禁用"
+                active-text="Enable"
+                inactive-text="Disable"
               />
             </el-form-item>
           </el-form>
         </el-card>
 
-        <!-- 界面设置 -->
+        <!-- Interface Settings -->
         <el-card class="settings-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><Monitor /></el-icon>
-              <span>界面设置</span>
+              <span>Interface Settings</span>
             </div>
           </template>
           
           <el-form :model="uiSettings" label-width="140px" label-position="left">
-            <el-form-item label="主题模式">
+            <el-form-item label="Theme Mode">
               <el-radio-group v-model="uiSettings.theme">
-                <el-radio label="light">浅色主题</el-radio>
-                <el-radio label="dark">深色主题</el-radio>
-                <el-radio label="auto">跟随系统</el-radio>
+                <el-radio label="light">Light Theme</el-radio>
+                <el-radio label="dark">Dark Theme</el-radio>
+                <el-radio label="auto">Follow System</el-radio>
               </el-radio-group>
             </el-form-item>
             
-            <el-form-item label="语言">
+            <el-form-item label="Language">
               <el-select v-model="uiSettings.language" style="width: 150px;">
-                <el-option label="中文" value="zh-CN" />
+                <el-option label="Chinese" value="zh-CN" />
                 <el-option label="English" value="en-US" />
               </el-select>
             </el-form-item>
             
-            <el-form-item label="列表显示模式">
+            <el-form-item label="List Display Mode">
               <el-radio-group v-model="uiSettings.listViewMode">
-                <el-radio label="list">列表模式</el-radio>
-                <el-radio label="grid">网格模式</el-radio>
+                <el-radio label="list">List Mode</el-radio>
+                <el-radio label="grid">Grid Mode</el-radio>
               </el-radio-group>
             </el-form-item>
             
-            <el-form-item label="每页显示数量">
+            <el-form-item label="Items Per Page">
               <el-select v-model="uiSettings.pageSize" style="width: 150px;">
                 <el-option label="10" :value="10" />
                 <el-option label="20" :value="20" />
@@ -206,45 +206,45 @@
               </el-select>
             </el-form-item>
             
-            <el-form-item label="显示缩略图">
+            <el-form-item label="Show Thumbnails">
               <el-switch
                 v-model="uiSettings.showThumbnails"
-                active-text="显示"
-                inactive-text="隐藏"
+                active-text="Show"
+                inactive-text="Hide"
               />
             </el-form-item>
             
-            <el-form-item label="紧凑模式">
+            <el-form-item label="Compact Mode">
               <el-switch
                 v-model="uiSettings.compactMode"
-                active-text="启用"
-                inactive-text="禁用"
+                active-text="Enable"
+                inactive-text="Disable"
               />
               <div class="setting-description">
-                减少界面元素间距，显示更多内容
+                Reduce interface spacing to show more content
               </div>
             </el-form-item>
           </el-form>
         </el-card>
 
-        <!-- 高级设置 -->
+        <!-- Advanced Settings -->
         <el-card class="settings-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><Tools /></el-icon>
-              <span>高级设置</span>
+              <span>Advanced Settings</span>
             </div>
           </template>
           
           <el-form :model="advancedSettings" label-width="140px" label-position="left">
-            <el-form-item label="API 端点">
+            <el-form-item label="API Endpoint">
               <el-input
                 v-model="advancedSettings.apiEndpoint"
                 placeholder="http://export.arxiv.org/api/query"
               />
             </el-form-item>
             
-            <el-form-item label="代理设置">
+            <el-form-item label="Proxy Settings">
               <el-input
                 v-model="advancedSettings.proxyUrl"
                 placeholder="http://proxy.example.com:8080"
@@ -255,32 +255,32 @@
               </el-input>
             </el-form-item>
             
-            <el-form-item label="用户代理">
+            <el-form-item label="User Agent">
               <el-input
                 v-model="advancedSettings.userAgent"
                 placeholder="ArxivDownloader/1.0"
               />
             </el-form-item>
             
-            <el-form-item label="缓存设置">
+            <el-form-item label="Cache Settings">
               <el-row :gutter="10">
                 <el-col :span="12">
                   <el-switch
                     v-model="advancedSettings.enableCache"
-                    active-text="启用缓存"
-                    inactive-text="禁用缓存"
+                    active-text="Enable Cache"
+                    inactive-text="Disable Cache"
                   />
                 </el-col>
                 <el-col :span="12">
                   <el-button @click="clearCache" :disabled="!advancedSettings.enableCache">
                     <el-icon><Delete /></el-icon>
-                    清除缓存
+                    Clear Cache
                   </el-button>
                 </el-col>
               </el-row>
             </el-form-item>
             
-            <el-form-item label="日志级别">
+            <el-form-item label="Log Level">
               <el-select v-model="advancedSettings.logLevel" style="width: 150px;">
                 <el-option label="DEBUG" value="debug" />
                 <el-option label="INFO" value="info" />
@@ -289,156 +289,156 @@
               </el-select>
             </el-form-item>
             
-            <el-form-item label="开发者模式">
+            <el-form-item label="Developer Mode">
               <el-switch
                 v-model="advancedSettings.developerMode"
-                active-text="启用"
-                inactive-text="禁用"
+                active-text="Enable"
+                inactive-text="Disable"
               />
               <div class="setting-description">
-                显示调试信息和额外的开发工具
+                Show debug information and additional development tools
               </div>
             </el-form-item>
           </el-form>
         </el-card>
       </el-col>
 
-      <!-- 右侧信息面板 -->
+      <!-- Right info panel -->
       <el-col :span="6">
-        <!-- 系统信息 -->
+        <!-- System Information -->
         <el-card class="info-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><InfoFilled /></el-icon>
-              <span>系统信息</span>
+              <span>System Information</span>
             </div>
           </template>
           
           <div class="info-item">
-            <span class="info-label">版本号:</span>
+            <span class="info-label">Version:</span>
             <span class="info-value">v1.2.3</span>
           </div>
           
           <div class="info-item">
-            <span class="info-label">构建日期:</span>
+            <span class="info-label">Build Date:</span>
             <span class="info-value">2024-01-15</span>
           </div>
           
           <div class="info-item">
-            <span class="info-label">Python版本:</span>
+            <span class="info-label">Python Version:</span>
             <span class="info-value">3.9.7</span>
           </div>
           
           <div class="info-item">
-            <span class="info-label">缓存大小:</span>
+            <span class="info-label">Cache Size:</span>
             <span class="info-value">{{ formatFileSize(cacheSize) }}</span>
           </div>
           
           <div class="info-item">
-            <span class="info-label">下载目录:</span>
+            <span class="info-label">Download Directory:</span>
             <span class="info-value">{{ formatPath(downloadSettings.downloadDir) }}</span>
           </div>
         </el-card>
 
-        <!-- 快捷操作 -->
+        <!-- Quick Actions -->
         <el-card class="info-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><Operation /></el-icon>
-              <span>快捷操作</span>
+              <span>Quick Actions</span>
             </div>
           </template>
           
           <div class="quick-actions">
             <el-button @click="openDownloadDir" style="width: 100%; margin-bottom: 10px;">
               <el-icon><FolderOpened /></el-icon>
-              打开下载目录
+              Open Download Directory
             </el-button>
             
             <el-button @click="exportSettings" style="width: 100%; margin-bottom: 10px;">
               <el-icon><Upload /></el-icon>
-              导出设置
+              Export Settings
             </el-button>
             
             <el-button @click="importSettings" style="width: 100%; margin-bottom: 10px;">
               <el-icon><Download /></el-icon>
-              导入设置
+              Import Settings
             </el-button>
             
             <el-button @click="checkUpdates" style="width: 100%; margin-bottom: 10px;">
               <el-icon><Refresh /></el-icon>
-              检查更新
+              Check Updates
             </el-button>
             
             <el-button @click="showAbout" style="width: 100%;">
               <el-icon><QuestionFilled /></el-icon>
-              关于软件
+              About Software
             </el-button>
           </div>
         </el-card>
 
-        <!-- 使用统计 -->
+        <!-- Usage Statistics -->
         <el-card class="info-card" shadow="hover">
           <template #header>
             <div class="card-header">
               <el-icon><DataAnalysis /></el-icon>
-              <span>使用统计</span>
+              <span>Usage Statistics</span>
             </div>
           </template>
           
           <div class="stats-item">
             <div class="stats-number">{{ usageStats.totalSearches }}</div>
-            <div class="stats-label">总搜索次数</div>
+            <div class="stats-label">Total Searches</div>
           </div>
           
           <div class="stats-item">
             <div class="stats-number">{{ usageStats.totalDownloads }}</div>
-            <div class="stats-label">总下载次数</div>
+            <div class="stats-label">Total Downloads</div>
           </div>
           
           <div class="stats-item">
             <div class="stats-number">{{ formatFileSize(usageStats.totalSize) }}</div>
-            <div class="stats-label">累计下载大小</div>
+            <div class="stats-label">Total Download Size</div>
           </div>
           
           <div class="stats-item">
             <div class="stats-number">{{ usageStats.daysUsed }}</div>
-            <div class="stats-label">使用天数</div>
+            <div class="stats-label">Days Used</div>
           </div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 关于对话框 -->
-    <el-dialog v-model="aboutDialogVisible" title="关于 ArXiv 论文下载器" width="500px">
+    <!-- About Dialog -->
+    <el-dialog v-model="aboutDialogVisible" title="About ArXiv Paper Downloader" width="500px">
       <div class="about-content">
         <div class="about-logo">
           <el-icon size="60"><Document /></el-icon>
         </div>
         
-        <h3>ArXiv 论文下载器</h3>
-        <p>版本: v1.2.3</p>
-        <p>一个功能强大的 ArXiv 论文搜索和下载工具</p>
+        <h3>ArXiv Paper Downloader</h3>
+        <p>Version: v1.2.3</p>
+        <p>A powerful ArXiv paper search and download tool</p>
         
         <div class="about-features">
-          <h4>主要功能:</h4>
+          <h4>Main Features:</h4>
           <ul>
-            <li>智能论文搜索</li>
-            <li>批量下载管理</li>
-            <li>多格式支持</li>
-            <li>下载统计分析</li>
+            <li>Intelligent paper search</li>
+            <li>Batch download management</li>
+            <li>Multiple format support</li>
+            <li>Download statistics analysis</li>
           </ul>
         </div>
         
         <div class="about-links">
-          <el-button link>GitHub 仓库</el-button>
-          <el-button link>使用文档</el-button>
-          <el-button link>问题反馈</el-button>
+          <el-button link>GitHub Repository</el-button>
+          <el-button link>Documentation</el-button>
+          <el-button link>Issue Feedback</el-button>
         </div>
       </div>
       
       <template #footer>
-        <el-button @click="aboutDialogVisible = false">关闭</el-button>
+        <el-button @click="aboutDialogVisible = false">Close</el-button>
       </template>
     </el-dialog>
   </div>
@@ -448,10 +448,10 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
-// 对话框状态
+// Dialog state
 const aboutDialogVisible = ref(false)
 
-// 下载设置
+// Download settings
 const downloadSettings = reactive({
   downloadDir: '/Users/username/Downloads/arxiv_papers',
   maxConcurrent: 3,
@@ -461,7 +461,7 @@ const downloadSettings = reactive({
   notification: true
 })
 
-// 搜索设置
+// Search settings
 const searchSettings = reactive({
   defaultMaxResults: 50,
   defaultSortBy: 'relevance',
@@ -470,7 +470,7 @@ const searchSettings = reactive({
   autoComplete: true
 })
 
-// 界面设置
+// UI settings
 const uiSettings = reactive({
   theme: 'light',
   language: 'zh-CN',
@@ -480,7 +480,7 @@ const uiSettings = reactive({
   compactMode: false
 })
 
-// 高级设置
+// Advanced settings
 const advancedSettings = reactive({
   apiEndpoint: 'http://export.arxiv.org/api/query',
   useProxy: false,
@@ -491,10 +491,10 @@ const advancedSettings = reactive({
   developerMode: false
 })
 
-// 系统信息
+// System information
 const cacheSize = ref(52428800) // 50MB
 
-// 使用统计
+// Usage statistics
 const usageStats = reactive({
   totalSearches: 1234,
   totalDownloads: 567,
@@ -502,7 +502,7 @@ const usageStats = reactive({
   daysUsed: 45
 })
 
-// 格式化文件大小
+// Format file size
 const formatFileSize = (bytes) => {
   if (bytes === 0) return '0 B'
   const k = 1024
@@ -511,7 +511,7 @@ const formatFileSize = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// 格式化路径
+// Format path
 const formatPath = (path) => {
   if (path.length > 30) {
     return '...' + path.slice(-27)
@@ -519,36 +519,36 @@ const formatPath = (path) => {
   return path
 }
 
-// 选择下载目录
+// Select download directory
 const selectDownloadDir = () => {
-  ElMessage.info('文件选择器功能需要后端支持')
+  ElMessage.info('File selector requires backend support')
 }
 
-// 保存设置
+// Save settings
 const saveSettings = async () => {
   try {
-    // 这里应该调用 API 保存设置
+    // Should call API to save settings here
     await new Promise(resolve => setTimeout(resolve, 1000))
-    ElMessage.success('设置已保存')
+    ElMessage.success('Settings saved')
   } catch (error) {
-    ElMessage.error('保存设置失败')
+    ElMessage.error('Failed to save settings')
   }
 }
 
-// 恢复默认设置
+// Restore default settings
 const resetToDefaults = async () => {
   try {
     await ElMessageBox.confirm(
-      '确定要恢复所有设置到默认值吗？此操作不可撤销。',
-      '确认恢复默认设置',
+      'Are you sure you want to restore all settings to default values? This operation cannot be undone.',
+      'Confirm Restore Default Settings',
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
     
-    // 重置所有设置到默认值
+    // Reset all settings to default values
     Object.assign(downloadSettings, {
       downloadDir: '/Users/username/Downloads/arxiv_papers',
       maxConcurrent: 3,
@@ -585,40 +585,40 @@ const resetToDefaults = async () => {
       developerMode: false
     })
     
-    ElMessage.success('已恢复默认设置')
+    ElMessage.success('Default settings restored')
   } catch {
-    // 用户取消操作
+    // User cancelled operation
   }
 }
 
-// 清除缓存
+// Clear cache
 const clearCache = async () => {
   try {
     await ElMessageBox.confirm(
-      '确定要清除所有缓存数据吗？',
-      '确认清除缓存',
+      'Are you sure you want to clear all cache data?',
+      'Confirm Clear Cache',
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+        confirmButtonText: 'OK',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       }
     )
     
-    // 这里应该调用 API 清除缓存
+    // Should call API to clear cache here
     await new Promise(resolve => setTimeout(resolve, 1000))
     cacheSize.value = 0
-    ElMessage.success('缓存已清除')
+    ElMessage.success('Cache cleared')
   } catch {
-    // 用户取消操作
+    // User cancelled operation
   }
 }
 
-// 打开下载目录
+// Open download directory
 const openDownloadDir = () => {
-  ElMessage.info('打开文件夹功能需要后端支持')
+  ElMessage.info('Open folder feature requires backend support')
 }
 
-// 导出设置
+// Export settings
 const exportSettings = () => {
   const settings = {
     download: downloadSettings,
@@ -637,10 +637,10 @@ const exportSettings = () => {
   link.click()
   
   URL.revokeObjectURL(url)
-  ElMessage.success('设置已导出')
+  ElMessage.success('Settings exported')
 }
 
-// 导入设置
+// Import settings
 const importSettings = () => {
   const input = document.createElement('input')
   input.type = 'file'
@@ -660,9 +660,9 @@ const importSettings = () => {
         if (settings.ui) Object.assign(uiSettings, settings.ui)
         if (settings.advanced) Object.assign(advancedSettings, settings.advanced)
         
-        ElMessage.success('设置已导入')
+        ElMessage.success('Settings imported')
       } catch (error) {
-        ElMessage.error('导入设置失败：文件格式错误')
+        ElMessage.error('Failed to import settings: Invalid file format')
       }
     }
     
@@ -672,26 +672,26 @@ const importSettings = () => {
   input.click()
 }
 
-// 检查更新
+// Check updates
 const checkUpdates = async () => {
   try {
-    ElMessage.info('正在检查更新...')
-    // 模拟检查更新
+    ElMessage.info('Checking for updates...')
+    // Simulate update check
     await new Promise(resolve => setTimeout(resolve, 2000))
-    ElMessage.success('当前已是最新版本')
+    ElMessage.success('Already the latest version')
   } catch (error) {
-    ElMessage.error('检查更新失败')
+    ElMessage.error('Failed to check updates')
   }
 }
 
-// 显示关于对话框
+// Show about dialog
 const showAbout = () => {
   aboutDialogVisible.value = true
 }
 
 onMounted(() => {
-  // 加载设置
-  console.log('设置页面已加载')
+  // Load settings
+  console.log('Settings page loaded')
 })
 </script>
 
@@ -844,7 +844,7 @@ onMounted(() => {
   margin: 0 5px;
 }
 
-/* 暗色主题适配 */
+/* Dark theme adaptation */
 :global(.dark) .title-header .title {
   color: #e5eaf3;
 }

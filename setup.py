@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-ArXiv论文下载器安装脚本
+ArXiv Paper Downloader Installation Script
 """
 
 from setuptools import setup, find_packages
 from pathlib import Path
 
-# 读取README文件
+# Read README file
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text(encoding='utf-8')
 
-# 读取requirements文件
+# Read requirements file
 requirements = []
 with open('requirements.txt', 'r', encoding='utf-8') as f:
     for line in f:
@@ -20,11 +19,11 @@ with open('requirements.txt', 'r', encoding='utf-8') as f:
             requirements.append(line)
 
 setup(
-    name="arxiv-downloader",
-    version="1.0.0",
-    author="ArXiv Downloader Team",
-    author_email="your.email@example.com",
-    description="智能ArXiv论文下载器，支持批量下载、智能命名和缓存机制",
+    name="arxiv-paper-downloader",
+    version="2.0.0",
+    author="AI Assistant",
+    author_email="assistant@example.com",
+    description="Intelligent ArXiv paper downloader with batch download, smart naming and caching mechanism",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/arxiv-downloader",

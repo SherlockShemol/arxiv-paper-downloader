@@ -1,54 +1,54 @@
 <template>
   <div id="app">
     <div class="container">
-      <h1>ArXiv 论文下载器</h1>
+      <h1>ArXiv Paper Downloader</h1>
       
-      <!-- 后端连接状态 -->
+      <!-- Backend connection status -->
       <div class="status-bar" :class="{ 'connected': backendConnected, 'disconnected': !backendConnected }">
-        <span v-if="backendConnected">✅ 后端已连接</span>
-        <span v-else>❌ 后端未连接</span>
-        <button @click="testConnection" :disabled="testing">测试连接</button>
+        <span v-if="backendConnected">✅ Backend Connected</span>
+        <span v-else>❌ Backend Disconnected</span>
+        <button @click="testConnection" :disabled="testing">Test Connection</button>
       </div>
 
-      <!-- 搜索表单 -->
+      <!-- Search form -->
       <div class="search-section">
-        <h2>搜索论文</h2>
+        <h2>Search Papers</h2>
         <div class="search-form">
           <input 
             v-model="searchQuery" 
             type="text" 
-            placeholder="输入搜索关键词..."
+            placeholder="Enter search keywords..."
             @keyup.enter="searchPapers"
           />
           <input 
             v-model="maxResults" 
             type="number" 
-            placeholder="最大结果数"
+            placeholder="Max Results"
             min="1"
             max="50"
           />
-          <button @click="searchPapers" :disabled="searching">搜索</button>
+          <button @click="searchPapers" :disabled="searching">Search</button>
         </div>
         
-        <!-- 时间范围选择 -->
+        <!-- Date range selection -->
         <div class="date-range">
-          <label>时间范围:</label>
+          <label>Date Range:</label>
           <input 
             v-model="dateFrom" 
             type="date" 
-            placeholder="开始日期"
+            placeholder="Start Date"
           />
-          <span>至</span>
+          <span>to</span>
           <input 
             v-model="dateTo" 
             type="date" 
-            placeholder="结束日期"
+            placeholder="End Date"
           />
         </div>
         
-        <!-- 关键词推荐 -->
+        <!-- Keyword recommendations -->
         <div class="keywords-section">
-          <h3>推荐关键词</h3>
+          <h3>Recommended Keywords</h3>
           <div class="keywords-grid">
             <button 
               v-for="keyword in recommendedKeywords" 
@@ -62,30 +62,30 @@
         </div>
       </div>
 
-      <!-- 搜索结果 -->
+      <!-- Search results -->
       <div v-if="searchResults.length > 0" class="results-section">
-        <h2>搜索结果 ({{ searchResults.length }})</h2>
+        <h2>Search Results ({{ searchResults.length }})</h2>
         <div class="papers-list">
           <div v-for="paper in searchResults" :key="paper.id" class="paper-item">
             <h3>{{ paper.title }}</h3>
-            <p><strong>作者:</strong> {{ paper.authors.join(', ') }}</p>
-            <p><strong>发布时间:</strong> {{ formatDate(paper.published) }}</p>
-            <p><strong>分类:</strong> {{ paper.categories.join(', ') }}</p>
+            <p><strong>Authors:</strong> {{ paper.authors.join(', ') }}</p>
+            <p><strong>Published:</strong> {{ formatDate(paper.published) }}</p>
+            <p><strong>Categories:</strong> {{ paper.categories.join(', ') }}</p>
             <p class="abstract">{{ paper.summary.substring(0, 200) }}...</p>
             <div class="paper-actions">
-              <a :href="paper.arxiv_url" target="_blank">查看原文</a>
+              <a :href="paper.arxiv_url" target="_blank">View Original</a>
               <button @click="downloadPaper(paper)" :disabled="paper.downloading">
-                {{ paper.downloading ? '下载中...' : '下载PDF' }}
+                {{ paper.downloading ? 'Downloading...' : 'Download PDF' }}
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 下载历史 -->
+      <!-- Download history -->
       <div class="downloads-section">
-        <h2>下载历史</h2>
-        <button @click="loadDownloads">刷新</button>
+        <h2>Download History</h2>
+        <button @click="loadDownloads">Refresh</button>
         <div v-if="downloads.length > 0" class="downloads-list">
           <div v-for="download in downloads" :key="download.id" class="download-item">
             <span>{{ download.title }}</span>
@@ -93,7 +93,7 @@
             <span>{{ formatDate(download.created_at) }}</span>
           </div>
         </div>
-        <p v-else>暂无下载记录</p>
+        <p v-else>No download records</p>
       </div>
 
 
@@ -104,7 +104,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-// 响应式数据
+// Reactive data
 const backendConnected = ref(false)
 const testing = ref(false)
 const searchQuery = ref('')
@@ -116,29 +116,29 @@ const searchResults = ref([])
 const downloads = ref([])
 const recommendedKeywords = ref([])
 
-// API基础URL
+// API base URL
 const API_BASE = '/api'
 
-// 测试后端连接
+// Test backend connection
 const testConnection = async () => {
   testing.value = true
   try {
     const response = await fetch(`${API_BASE}/system/info`)
     const data = await response.json()
     backendConnected.value = data.success || false
-    console.log('后端连接测试:', data)
+    console.log('Backend connection test:', data)
   } catch (error) {
-    console.error('连接测试失败:', error)
+    console.error('Connection test failed:', error)
     backendConnected.value = false
   } finally {
     testing.value = false
   }
 }
 
-// 搜索论文
+// Search papers
 const searchPapers = async () => {
   if (!searchQuery.value.trim()) {
-    alert('请输入搜索关键词')
+    alert('Please enter search keywords')
     return
   }
   
@@ -149,7 +149,7 @@ const searchPapers = async () => {
       max_results: maxResults.value
     })
     
-    // 添加时间参数
+    // Add time parameters
     if (dateFrom.value) {
       params.append('date_from', dateFrom.value)
     }
@@ -162,29 +162,29 @@ const searchPapers = async () => {
     
     if (data.success) {
       searchResults.value = data.papers
-      console.log('搜索成功:', data)
+      console.log('Search successful:', data)
     } else {
-      alert('搜索失败: ' + data.error)
+      alert('Search failed: ' + data.error)
     }
   } catch (error) {
-    console.error('搜索失败:', error)
-    alert('搜索失败: ' + error.message)
+    console.error('Search failed:', error)
+    alert('Search failed: ' + error.message)
   } finally {
     searching.value = false
   }
 }
 
-// 选择下载目录
+// Select download directory
 const selectDownloadPath = () => {
   return new Promise((resolve) => {
-    // 获取用户的默认下载路径
+    // Get user's default download path
     const defaultPath = localStorage.getItem('arxiv_download_path') || '~/Downloads/ArXiv_Papers'
     
-    // 提示用户输入下载路径
-    const path = prompt('请输入下载路径:', defaultPath)
+    // Prompt user to enter download path
+    const path = prompt('Please enter download path:', defaultPath)
     
     if (path && path.trim()) {
-      // 保存用户选择的路径
+      // Save user selected path
       localStorage.setItem('arxiv_download_path', path.trim())
       resolve(path.trim())
     } else {
@@ -193,16 +193,16 @@ const selectDownloadPath = () => {
   })
 }
 
-// 下载论文
+// Download paper
 const downloadPaper = async (paper) => {
   paper.downloading = true
   
   try {
-    // 让用户选择下载路径
+    // Let user select download path
     const selectedPath = await selectDownloadPath()
     
     if (!selectedPath) {
-      alert('请选择下载目录')
+      alert('Please select download directory')
       return
     }
     
@@ -221,20 +221,20 @@ const downloadPaper = async (paper) => {
     const data = await response.json()
     
     if (data.success) {
-      alert(`下载成功！文件保存到: ${selectedPath}`)
-      loadDownloads() // 刷新下载列表
+      alert(`Download successful! File saved to: ${selectedPath}`)
+      loadDownloads() // Refresh download list
     } else {
-      alert('下载失败: ' + data.error)
+      alert('Download failed: ' + data.error)
     }
   } catch (error) {
-    console.error('下载失败:', error)
-    alert('下载失败: ' + error.message)
+    console.error('Download failed:', error)
+    alert('Download failed: ' + error.message)
   } finally {
     paper.downloading = false
   }
 }
 
-// 加载下载历史
+// Load download history
 const loadDownloads = async () => {
   try {
     const response = await fetch(`${API_BASE}/downloads`)
@@ -244,11 +244,11 @@ const loadDownloads = async () => {
       downloads.value = data.downloads
     }
   } catch (error) {
-    console.error('加载下载历史失败:', error)
+    console.error('Failed to load download history:', error)
   }
 }
 
-// 加载推荐关键词
+// Load recommended keywords
 const loadRecommendedKeywords = async () => {
   try {
     const response = await fetch(`${API_BASE}/keywords/recommendations`)
@@ -258,22 +258,22 @@ const loadRecommendedKeywords = async () => {
       recommendedKeywords.value = data.keywords
     }
   } catch (error) {
-    console.error('加载推荐关键词失败:', error)
+    console.error('Failed to load recommended keywords:', error)
   }
 }
 
-// 使用推荐关键词
+// Use recommended keyword
 const useKeyword = (keyword) => {
   searchQuery.value = keyword
 }
 
-// 格式化日期
+// Format date
 const formatDate = (dateString) => {
-  if (!dateString) return '未知'
+  if (!dateString) return 'Unknown'
   return new Date(dateString).toLocaleString('zh-CN')
 }
 
-// 组件挂载时测试连接
+// Test connection when component mounts
 onMounted(() => {
   testConnection()
   loadDownloads()

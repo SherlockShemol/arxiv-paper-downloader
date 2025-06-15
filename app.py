@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Flask Web API for ArXiv Paper Downloader
-提供论文搜索、下载和管理的Web API接口
+Provides Web API interface for paper search, download and management
 """
 
 import os
@@ -21,18 +21,18 @@ from config import Config
 from utils import sanitize_filename, ensure_directory
 
 app = Flask(__name__)
-CORS(app)  # 允许跨域请求
+CORS(app)  # Allow cross-origin requests
 
 class DownloadManager(LoggerMixin):
-    """下载管理器"""
+    """Download Manager"""
     
     def __init__(self):
-        self.downloads = {}  # 存储下载任务
-        self.download_history = []  # 下载历史
+        self.downloads = {}  # Store download tasks
+        self.download_history = []  # Download history
         setup_logging()
     
     def add_download(self, paper_id: str, title: str, download_path: str) -> str:
-        """添加下载任务"""
+        """Add download task"""
         download_id = f"download_{len(self.downloads) + 1}_{int(datetime.now().timestamp())}"
         
         download_info = {
@@ -52,13 +52,13 @@ class DownloadManager(LoggerMixin):
         return download_id
     
     def update_download_status(self, download_id: str, status: str, progress: int = None):
-        """更新下载状态"""
+        """Update download status"""
         if download_id in self.downloads:
             self.downloads[download_id]['status'] = status
             if progress is not None:
                 self.downloads[download_id]['progress'] = progress
             
-            # 更新历史记录
+            # Update history record
             for item in self.download_history:
                 if item['id'] == download_id:
                     item['status'] = status
@@ -67,18 +67,18 @@ class DownloadManager(LoggerMixin):
                     break
     
     def get_download_status(self, download_id: str) -> Dict[str, Any]:
-        """获取下载状态"""
+        """Get download status"""
         return self.downloads.get(download_id, {})
     
     def get_download_history(self) -> List[Dict[str, Any]]:
-        """获取下载历史"""
+        """Get download history"""
         return self.download_history
 
-# 全局实例
+# Global instance
 download_manager = DownloadManager()
 
 def _validate_date_format(date_str: str) -> bool:
-    """验证日期格式 YYYY-MM-DD"""
+    """Validate date format YYYY-MM-DD"""
     try:
         from datetime import datetime
         datetime.strptime(date_str, '%Y-%m-%d')
@@ -86,7 +86,7 @@ def _validate_date_format(date_str: str) -> bool:
     except ValueError:
         return False
 
-# 推荐关键词列表
+# Recommended keywords list
 RECOMMENDED_KEYWORDS = [
     "machine learning",
     "deep learning",
@@ -112,27 +112,27 @@ RECOMMENDED_KEYWORDS = [
 
 @app.route('/api/papers/search', methods=['GET'])
 def search_papers():
-    """搜索论文"""
+    """Search papers"""
     try:
-        # 获取搜索参数
+        # Get search parameters
         query = request.args.get('query', '')
         max_results = int(request.args.get('max_results', 10))
         date_from = request.args.get('date_from')
         date_to = request.args.get('date_to')
         
-        # 验证日期格式
+        # Validate date format
         if date_from and not _validate_date_format(date_from):
-            return jsonify({'error': '日期格式错误，请使用YYYY-MM-DD格式'}), 400
+            return jsonify({'error': 'Invalid date format, please use YYYY-MM-DD format'}), 400
         if date_to and not _validate_date_format(date_to):
-            return jsonify({'error': '日期格式错误，请使用YYYY-MM-DD格式'}), 400
+            return jsonify({'error': 'Invalid date format, please use YYYY-MM-DD format'}), 400
         
         if not query.strip():
-            return jsonify({'error': '搜索关键词不能为空'}), 400
+            return jsonify({'error': 'Search query cannot be empty'}), 400
         
-        # 创建下载器实例（使用临时目录进行搜索）
+        # Create downloader instance (use temporary directory for search)
         downloader = ArxivDownloader()
         
-        # 搜索论文
+        # Search papers
         papers = downloader.search_papers(
             query=query,
             date_from=date_from,
@@ -140,7 +140,7 @@ def search_papers():
             max_results=max_results
         )
         
-        # 转换为字典格式
+        # Convert to dictionary format
         papers_data = []
         for paper in papers:
             paper_dict = {
@@ -148,7 +148,7 @@ def search_papers():
                 'title': paper.title,
                 'authors': paper.authors,
                 'summary': paper.abstract,
-                'abstract': paper.abstract,  # 兼容前端
+                'abstract': paper.abstract,  # Frontend compatibility
                 'published': paper.published if isinstance(paper.published, str) else paper.published,
                 'updated': getattr(paper, 'updated', None),
                 'categories': paper.categories,
@@ -165,42 +165,42 @@ def search_papers():
         })
         
     except Exception as e:
-        app.logger.error(f"搜索论文失败: {str(e)}")
-        return jsonify({'error': f'搜索失败: {str(e)}'}), 500
+        app.logger.error(f"Paper search failed: {str(e)}")
+        return jsonify({'error': f'Search failed: {str(e)}'}), 500
 
 @app.route('/api/papers/download', methods=['POST'])
 def download_paper():
-    """下载论文"""
+    """Download paper"""
     try:
         data = request.get_json()
         
         if not data:
-            return jsonify({'error': '请求数据不能为空'}), 400
+            return jsonify({'error': 'Request data cannot be empty'}), 400
         
         paper_id = data.get('paper_id')
         title = data.get('title', '')
         download_path = data.get('download_path')
         
         if not paper_id:
-            return jsonify({'error': '论文ID不能为空'}), 400
+            return jsonify({'error': 'Paper ID cannot be empty'}), 400
         
         if not download_path:
-            return jsonify({'error': '下载路径不能为空'}), 400
+            return jsonify({'error': 'Download path cannot be empty'}), 400
         
-        # 确保下载目录存在
+        # Ensure download directory exists
         ensure_directory(download_path)
         
-        # 创建下载器实例
+        # Create downloader instance
         downloader = ArxivDownloader(download_path)
         
-        # 添加下载任务
+        # Add download task
         download_id = download_manager.add_download(paper_id, title, download_path)
         
         try:
-            # 更新状态为下载中
+            # Update status to downloading
             download_manager.update_download_status(download_id, 'downloading', 0)
             
-            # 执行下载
+            # Execute download
             success = downloader.download_paper_by_id(paper_id)
             
             if success:
@@ -208,23 +208,23 @@ def download_paper():
                 return jsonify({
                     'success': True,
                     'download_id': download_id,
-                    'message': '下载成功'
+                    'message': 'Download successful'
                 })
             else:
                 download_manager.update_download_status(download_id, 'failed', 0)
-                return jsonify({'error': '下载失败'}), 500
+                return jsonify({'error': 'Download failed'}), 500
                 
         except Exception as e:
             download_manager.update_download_status(download_id, 'failed', 0)
             raise e
         
     except Exception as e:
-        app.logger.error(f"下载论文失败: {str(e)}")
-        return jsonify({'error': f'下载失败: {str(e)}'}), 500
+        app.logger.error(f"Paper download failed: {str(e)}")
+        return jsonify({'error': f'Download failed: {str(e)}'}), 500
 
 @app.route('/api/downloads', methods=['GET'])
 def get_downloads():
-    """获取下载列表"""
+    """Get download list"""
     try:
         downloads = download_manager.get_download_history()
         return jsonify({
@@ -232,28 +232,28 @@ def get_downloads():
             'downloads': downloads
         })
     except Exception as e:
-        app.logger.error(f"获取下载列表失败: {str(e)}")
-        return jsonify({'error': f'获取下载列表失败: {str(e)}'}), 500
+        app.logger.error(f"Failed to get download list: {str(e)}")
+        return jsonify({'error': f'Failed to get download list: {str(e)}'}), 500
 
 @app.route('/api/downloads/<download_id>/status', methods=['GET'])
 def get_download_status(download_id):
-    """获取下载状态"""
+    """Get download status"""
     try:
         status = download_manager.get_download_status(download_id)
         if not status:
-            return jsonify({'error': '下载任务不存在'}), 404
+            return jsonify({'error': 'Download task does not exist'}), 404
         
         return jsonify({
             'success': True,
             'status': status
         })
     except Exception as e:
-        app.logger.error(f"获取下载状态失败: {str(e)}")
-        return jsonify({'error': f'获取下载状态失败: {str(e)}'}), 500
+        app.logger.error(f"Failed to get download status: {str(e)}")
+        return jsonify({'error': f'Failed to get download status: {str(e)}'}), 500
 
 @app.route('/api/settings', methods=['GET'])
 def get_settings():
-    """获取系统设置"""
+    """Get system settings"""
     try:
         settings = {
             'default_download_path': str(Path.home() / 'Downloads' / 'ArXiv_Papers'),
@@ -266,12 +266,12 @@ def get_settings():
             'settings': settings
         })
     except Exception as e:
-        app.logger.error(f"获取设置失败: {str(e)}")
-        return jsonify({'error': f'获取设置失败: {str(e)}'}), 500
+        app.logger.error(f"Failed to get settings: {str(e)}")
+        return jsonify({'error': f'Failed to get settings: {str(e)}'}), 500
 
 @app.route('/api/system/info', methods=['GET'])
 def get_system_info():
-    """获取系统信息"""
+    """Get system information"""
     try:
         info = {
             'version': '1.0.0',
@@ -284,26 +284,26 @@ def get_system_info():
             'info': info
         })
     except Exception as e:
-        app.logger.error(f"获取系统信息失败: {str(e)}")
-        return jsonify({'error': f'获取系统信息失败: {str(e)}'}), 500
+        app.logger.error(f"Failed to get system information: {str(e)}")
+        return jsonify({'error': f'Failed to get system information: {str(e)}'}), 500
 
 @app.route('/api/keywords/recommendations', methods=['GET'])
 def get_keyword_recommendations():
-    """获取推荐关键词"""
+    """Get recommended keywords"""
     try:
         return jsonify({
             'success': True,
             'keywords': RECOMMENDED_KEYWORDS
         })
     except Exception as e:
-        app.logger.error(f"获取推荐关键词失败: {str(e)}")
-        return jsonify({'error': f'获取推荐关键词失败: {str(e)}'}), 500
+        app.logger.error(f"Failed to get recommended keywords: {str(e)}")
+        return jsonify({'error': f'Failed to get recommended keywords: {str(e)}'}), 500
 
 @app.route('/api', methods=['GET'])
 def api_info():
-    """API信息接口"""
+    """API information interface"""
     return jsonify({
-        'message': 'ArXiv 论文下载器 API',
+        'message': 'ArXiv Paper Downloader API',
         'version': '1.0.0',
         'endpoints': {
             'search': '/api/papers/search',
@@ -318,19 +318,19 @@ def api_info():
 
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({'error': '接口不存在'}), 404
+    return jsonify({'error': 'API endpoint not found'}), 404
 
 @app.errorhandler(500)
 def internal_error(error):
-    return jsonify({'error': '服务器内部错误'}), 500
+    return jsonify({'error': 'Internal server error'}), 500
 
 if __name__ == '__main__':
-    # 设置日志
+    # Setup logging
     import logging
     logging.basicConfig(level=logging.INFO)
     
-    print("启动 ArXiv 论文下载器 Web API...")
-    print("API 地址: http://localhost:5001")
-    print("前端地址: http://localhost:3000")
+    print("Starting ArXiv Paper Downloader Web API...")
+    print("API URL: http://localhost:5001")
+    print("Frontend URL: http://localhost:3000")
     
     app.run(host='0.0.0.0', port=5001, debug=True)

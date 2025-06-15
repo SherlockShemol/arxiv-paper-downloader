@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-增强功能测试
-测试异步下载器、插件系统等新功能
+Enhanced features test
+Test async downloader, plugin system and other new features
 """
 
 import pytest
@@ -20,10 +20,10 @@ from plugins import (
 from config import Config
 
 class TestPaperValidation:
-    """测试论文数据验证"""
+    """Test paper data validation"""
     
     def test_valid_paper(self):
-        """测试有效论文数据"""
+        """Test valid paper data"""
         paper = Paper(
             id="2301.00001",
             title="Test Paper",
@@ -37,7 +37,7 @@ class TestPaperValidation:
         assert paper.title == "Test Paper"
     
     def test_invalid_paper_empty_id(self):
-        """测试空ID的无效论文"""
+        """Test invalid paper with empty ID"""
         with pytest.raises(ValidationError):
             Paper(
                 id="",
@@ -50,7 +50,7 @@ class TestPaperValidation:
             )
     
     def test_invalid_paper_empty_title(self):
-        """测试空标题的无效论文"""
+        """Test invalid paper with empty title"""
         with pytest.raises(ValidationError):
             Paper(
                 id="2301.00001",
@@ -63,7 +63,7 @@ class TestPaperValidation:
             )
     
     def test_invalid_paper_bad_url(self):
-        """测试无效URL的论文"""
+        """Test paper with invalid URL"""
         with pytest.raises(ValidationError):
             Paper(
                 id="2301.00001",
@@ -76,17 +76,17 @@ class TestPaperValidation:
             )
 
 class TestAsyncDownloader:
-    """测试异步下载器"""
+    """Test async downloader"""
     
     @pytest.fixture
     def temp_dir(self):
-        """临时目录fixture"""
+        """Temporary directory fixture"""
         with tempfile.TemporaryDirectory() as tmpdir:
             yield Path(tmpdir)
     
     @pytest.fixture
     def sample_papers(self):
-        """示例论文数据"""
+        """Sample paper data"""
         return [
             Paper(
                 id="2301.00001",
@@ -110,16 +110,16 @@ class TestAsyncDownloader:
     
     @pytest.mark.asyncio
     async def test_async_downloader_init(self, temp_dir):
-        """测试异步下载器初始化"""
+        """Test async downloader initialization"""
         async with AsyncArxivDownloader(str(temp_dir)) as downloader:
             assert downloader.download_dir == temp_dir
             assert downloader.session is not None
     
     @pytest.mark.asyncio
     async def test_async_download_papers_mock(self, temp_dir, sample_papers):
-        """测试异步下载（模拟）"""
+        """Test async download (mocked)"""
         async with AsyncArxivDownloader(str(temp_dir), max_concurrent=2) as downloader:
-            # 模拟成功的HTTP响应
+            # Mock successful HTTP response
             with patch.object(downloader.session, 'get') as mock_get:
                 mock_response = AsyncMock()
                 mock_response.status = 200
@@ -133,17 +133,17 @@ class TestAsyncDownloader:
                 assert isinstance(result['stats'], type(downloader.stats))
 
 class TestPluginSystem:
-    """测试插件系统"""
+    """Test plugin system"""
     
     @pytest.fixture
     def temp_dir(self):
-        """临时目录fixture"""
+        """Temporary directory fixture"""
         with tempfile.TemporaryDirectory() as tmpdir:
             yield Path(tmpdir)
     
     @pytest.fixture
     def sample_paper(self):
-        """示例论文"""
+        """Sample paper"""
         return Paper(
             id="2301.00001",
             title="Test Paper",
@@ -155,82 +155,82 @@ class TestPluginSystem:
         )
     
     def test_plugin_manager_init(self):
-        """测试插件管理器初始化"""
+        """Test plugin manager initialization"""
         manager = PluginManager()
         assert len(manager.plugins) == 0
     
     def test_duplicate_check_plugin(self, temp_dir, sample_paper):
-        """测试重复检查插件"""
+        """Test duplicate check plugin"""
         plugin = DuplicateCheckPlugin(temp_dir)
         
-        # 第一次应该允许下载
+        # First time should allow download
         assert plugin.pre_download(sample_paper) is True
         
-        # 模拟下载成功
+        # Mock successful download
         plugin.post_download(sample_paper, temp_dir / "test.pdf", True)
         
-        # 第二次应该跳过（相同ID）
+        # Second time should skip (same ID)
         assert plugin.pre_download(sample_paper) is False
     
     def test_category_filter_plugin(self, sample_paper):
-        """测试分类过滤插件"""
-        # 测试允许的分类
+        """Test category filter plugin"""
+        # Test allowed category
         plugin = CategoryFilterPlugin(allowed_categories=["cs.AI"])
         assert plugin.pre_download(sample_paper) is True
         
-        # 测试不允许的分类
+        # Test disallowed category
         plugin = CategoryFilterPlugin(allowed_categories=["cs.CV"])
         assert plugin.pre_download(sample_paper) is False
         
-        # 测试阻止的分类
+        # Test blocked category
         plugin = CategoryFilterPlugin(blocked_categories=["cs.AI"])
         assert plugin.pre_download(sample_paper) is False
     
     def test_metadata_plugin(self, temp_dir, sample_paper):
-        """测试元数据插件"""
+        """Test metadata plugin"""
         plugin = MetadataPlugin(temp_dir)
         
-        # 创建测试文件
+        # Create test file
         test_file = temp_dir / "test.pdf"
         test_file.write_text("fake content")
         
-        # 执行后处理
+        # Execute post-processing
         plugin.post_download(sample_paper, test_file, True)
         
-        # 检查元数据文件是否创建
+        # Check if metadata file was created
         metadata_file = temp_dir / '.metadata' / f"{sample_paper.id}.json"
         assert metadata_file.exists()
     
     def test_statistics_plugin(self, temp_dir, sample_paper):
-        """测试统计插件"""
+        """Test statistics plugin"""
         plugin = StatisticsPlugin(temp_dir)
         
-        # 执行后处理
+        # Execute post-processing
         plugin.post_download(sample_paper, temp_dir / "test.pdf", True)
         
-        # 检查统计数据
+        # Check statistics data
         assert plugin.stats['total_downloads'] == 1
         assert plugin.stats['successful_downloads'] == 1
         assert 'cs.AI' in plugin.stats['categories']
         assert 'Author 1' in plugin.stats['authors']
     
     def test_plugin_manager_hooks(self, temp_dir, sample_paper):
-        """测试插件管理器钩子"""
+        """Test plugin manager hooks"""
         manager = create_default_plugins(temp_dir)
         
-        # 测试预下载钩子
+        # Test pre-download hook
         should_download = manager.pre_download_hook(sample_paper)
         assert should_download is True
         
-        # 测试后下载钩子
+        # Test post-download hook
         test_file = temp_dir / "test.pdf"
         test_file.write_text("fake content")
         
-        # 不应该抛出异常
+        # Should not throw exception
         manager.post_download_hook(sample_paper, test_file, True)
     
     def test_plugin_enable_disable(self):
-        """测试插件启用/禁用"""
+        """Test plugin enable/disable"""
         manager = PluginManager()
         plugin = DuplicateCheckPlugin()
         
@@ -244,39 +244,39 @@ class TestPluginSystem:
         assert plugin.enabled is True
     
     def test_list_plugins(self, temp_dir):
-        """测试列出插件"""
+        """Test list plugins"""
         manager = create_default_plugins(temp_dir)
         plugins = manager.list_plugins()
         
-        assert len(plugins) >= 3  # 至少有3个默认插件
+        assert len(plugins) >= 3  # At least 3 default plugins
         assert all('name' in p for p in plugins)
         assert all('enabled' in p for p in plugins)
         assert all('type' in p for p in plugins)
 
 class TestConfig:
-    """测试配置类"""
+    """Test config class"""
     
     def test_get_download_dir_default(self):
-        """测试获取默认下载目录"""
+        """Test get default download directory"""
         dir_path = Config.get_download_dir()
         assert isinstance(dir_path, Path)
         assert str(dir_path) == Config.DEFAULT_DOWNLOAD_DIR
     
     def test_get_download_dir_custom(self):
-        """测试获取自定义下载目录"""
+        """Test get custom download directory"""
         custom_dir = "/tmp/test"
         dir_path = Config.get_download_dir(custom_dir)
         assert isinstance(dir_path, Path)
         assert str(dir_path) == custom_dir
     
     def test_get_cache_dir(self):
-        """测试获取缓存目录"""
+        """Test get cache directory"""
         cache_dir = Config.get_cache_dir()
         assert isinstance(cache_dir, Path)
         assert cache_dir.name == '.cache'
     
     def test_get_log_dir(self):
-        """测试获取日志目录"""
+        """Test get log directory"""
         log_dir = Config.get_log_dir()
         assert isinstance(log_dir, Path)
         assert 'log' in str(log_dir).lower() or '.log' in str(log_dir)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-批量重命名现有论文文件
-将基于论文ID的文件名改为基于论文标题的文件名
+Batch rename existing paper files
+Change filename from paper ID-based to paper title-based
 """
 
 import os
@@ -18,27 +18,27 @@ class PaperRenamer:
     
     def sanitize_filename(self, title):
         """
-        清理文件名，移除或替换不合法的字符
+        Clean filename, remove or replace illegal characters
         """
-        # 移除或替换不合法的文件名字符
+        # Remove or replace illegal filename characters
         title = re.sub(r'[<>:"/\\|?*]', '', title)
-        # 替换多个空格为单个空格
+        # Replace multiple spaces with single space
         title = re.sub(r'\s+', ' ', title)
-        # 移除首尾空格
+        # Remove leading and trailing spaces
         title = title.strip()
-        # 限制文件名长度（避免过长）
+        # Limit filename length (avoid too long)
         if len(title) > 100:
             title = title[:100]
-        # 如果标题为空，使用论文ID
+        # If title is empty, use paper ID
         if not title:
             title = "Unknown_Title"
         return title
     
     def get_paper_info(self, paper_id):
         """
-        从ArXiv API获取论文信息
+        Get paper information from ArXiv API
         """
-        # 移除版本号（如果存在）
+        # Remove version number (if exists)
         clean_id = paper_id.replace('v1', '').replace('v2', '').replace('v3', '').replace('v4', '').replace('v5', '')
         
         params = {
@@ -50,7 +50,7 @@ class PaperRenamer:
             response = requests.get(self.base_url, params=params, timeout=30)
             response.raise_for_status()
             
-            # 解析XML响应
+            # Parse XML response
             root = ET.fromstring(response.text)
             namespaces = {
                 'atom': 'http://www.w3.org/2005/Atom',
@@ -64,72 +64,72 @@ class PaperRenamer:
                     return title_elem.text.strip().replace('\n', ' ')
             
         except Exception as e:
-            print(f"获取论文 {paper_id} 信息失败: {e}")
+            print(f"Failed to get paper {paper_id} information: {e}")
         
         return None
     
     def rename_files(self):
         """
-        重命名目录中的所有论文文件
+        Rename all paper files in the directory
         """
         if not self.download_dir.exists():
-            print(f"目录不存在: {self.download_dir}")
+            print(f"Directory does not exist: {self.download_dir}")
             return
         
-        # 查找所有PDF文件
+        # Find all PDF files
         pdf_files = list(self.download_dir.glob('*.pdf'))
         
-        # 过滤出以论文ID命名的文件（格式：数字.数字v数字.pdf）
+        # Filter files named with paper ID (format: number.numberv number.pdf)
         id_pattern = re.compile(r'^\d{4}\.\d{5}v\d+\.pdf$')
         id_files = [f for f in pdf_files if id_pattern.match(f.name)]
         
         if not id_files:
-            print("没有找到需要重命名的文件")
+            print("No files found that need renaming")
             return
         
-        print(f"找到 {len(id_files)} 个需要重命名的文件")
+        print(f"Found {len(id_files)} files that need renaming")
         
         renamed_count = 0
         for pdf_file in id_files:
-            paper_id = pdf_file.stem  # 移除.pdf扩展名
-            print(f"\n处理: {pdf_file.name}")
+            paper_id = pdf_file.stem  # Remove .pdf extension
+            print(f"\nProcessing: {pdf_file.name}")
             
-            # 获取论文标题
+            # Get paper title
             title = self.get_paper_info(paper_id)
             if not title:
-                print(f"  跳过: 无法获取论文标题")
+                print(f"  Skipped: Unable to get paper title")
                 continue
             
-            # 清理标题作为文件名
+            # Clean title as filename
             clean_title = self.sanitize_filename(title)
             new_filename = f"{clean_title}.pdf"
             new_filepath = self.download_dir / new_filename
             
-            # 如果新文件名已存在，添加ID后缀
+            # If new filename already exists, add ID suffix
             if new_filepath.exists() and new_filepath != pdf_file:
                 new_filename = f"{clean_title}_{paper_id}.pdf"
                 new_filepath = self.download_dir / new_filename
             
-            # 重命名文件
+            # Rename file
             try:
                 pdf_file.rename(new_filepath)
-                print(f"  ✓ 重命名为: {new_filename}")
+                print(f"  ✓ Renamed to: {new_filename}")
                 renamed_count += 1
                 
-                # 同时重命名对应的MD文件（如果存在）
+                # Also rename corresponding MD file (if exists)
                 md_file = pdf_file.with_suffix('.md')
                 if md_file.exists():
                     new_md_filepath = new_filepath.with_suffix('.md')
                     md_file.rename(new_md_filepath)
-                    print(f"  ✓ 同时重命名MD文件")
+                    print(f"  ✓ Also renamed MD file")
                 
             except Exception as e:
-                print(f"  ✗ 重命名失败: {e}")
+                print(f"  ✗ Rename failed: {e}")
             
-            # 添加延迟避免API请求过于频繁
+            # Add delay to avoid too frequent API requests
             time.sleep(1)
         
-        print(f"\n重命名完成！成功重命名 {renamed_count}/{len(id_files)} 个文件")
+        print(f"\nRename completed! Successfully renamed {renamed_count}/{len(id_files)} files")
 
 def main():
     renamer = PaperRenamer()
