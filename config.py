@@ -6,7 +6,7 @@ class Config:
     """应用配置类"""
     
     # 默认配置
-    DEFAULT_DOWNLOAD_DIR = "/Users/shemol/Downloads/arvix_paper"
+    DEFAULT_DOWNLOAD_DIR = "~/Downloads/arxiv_papers"
     DEFAULT_QUERY = "cat:cs.AI"
     DEFAULT_MAX_RESULTS = 10
     

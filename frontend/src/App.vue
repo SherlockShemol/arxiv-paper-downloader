@@ -178,7 +178,7 @@ const searchPapers = async () => {
 const selectDownloadPath = () => {
   return new Promise((resolve) => {
     // 获取用户的默认下载路径
-    const defaultPath = localStorage.getItem('arxiv_download_path') || '/Users/shemol/Downloads/ArXiv_Papers'
+    const defaultPath = localStorage.getItem('arxiv_download_path') || '~/Downloads/ArXiv_Papers'
     
     // 提示用户输入下载路径
     const path = prompt('请输入下载路径:', defaultPath)

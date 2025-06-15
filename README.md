@@ -248,7 +248,7 @@ python3 arxiv_downloader.py --download-dir "/path/to/your/directory"
 | `--date-from` | 开始日期 (YYYY-MM-DD) | 无 |
 | `--date-to` | 结束日期 (YYYY-MM-DD) | 无 |
 | `--max-results` | 最大结果数 | 10 |
-| `--download-dir` | 下载目录 | `/Users/shemol/Downloads/arvix_paper` |
+| `--download-dir` | 下载目录 | `~/Downloads/arxiv_papers` |
 | `--today` | 下载今天的论文 | - |
 | `--yesterday` | 下载昨天的论文 | - |
 | `--last-week` | 下载最近一周的论文 | - |
@@ -282,10 +282,10 @@ ArXiv支持多种搜索语法：
 crontab -e
 
 # 添加以下行，每天上午9点下载昨天的论文
-0 9 * * * cd /Users/shemol/Code/arxiv_paper_download && python3 arxiv_downloader.py --yesterday
+0 9 * * * cd /path/to/arxiv_paper_download && python3 arxiv_downloader.py --yesterday
 
 # 每周一上午9点下载上周的论文
-0 9 * * 1 cd /Users/shemol/Code/arxiv_paper_download && python3 arxiv_downloader.py --last-week
+0 9 * * 1 cd /path/to/arxiv_paper_download && python3 arxiv_downloader.py --last-week
 ```
 
 ### 创建shell脚本
@@ -293,7 +293,7 @@ crontab -e
 ```bash
 # 创建daily_download.sh
 #!/bin/bash
-cd /Users/shemol/Code/arxiv_paper_download
+cd /path/to/arxiv_paper_download
 python3 arxiv_downloader.py --yesterday --max-results 20
 
 # 给脚本执行权限
@@ -336,8 +336,8 @@ chmod +x daily_download.sh
 ...
 
 下载完成！成功下载 15/15 篇论文
-文件保存在: /Users/shemol/Downloads/arvix_paper
-总结文档已生成: /Users/shemol/Downloads/arvix_paper/下载总结.md
+文件保存在: ~/Downloads/arxiv_papers
+总结文档已生成: ~/Downloads/arxiv_papers/下载总结.md
 ```
 
 ## 批量重命名现有文件

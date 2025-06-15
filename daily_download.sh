@@ -58,4 +58,4 @@ esac
 
 echo
 echo "下载完成！"
-echo "文件位置: /Users/shemol/Downloads/arvix_paper"
+echo "文件位置: ~/Downloads/arxiv_papers"

@@ -12,7 +12,7 @@ def find_and_move_papers():
     """查找并移动下载的论文到目标目录"""
     
     # 目标目录
-    target_dir = "/Users/shemol/Downloads/arvix_paper"
+    target_dir = "~/Downloads/arxiv_papers"
     
     # 可能的源目录（MCP服务器通常将文件存储在这些位置）
     possible_source_dirs = [

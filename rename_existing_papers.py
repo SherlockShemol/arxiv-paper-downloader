@@ -12,7 +12,7 @@ from pathlib import Path
 import time
 
 class PaperRenamer:
-    def __init__(self, download_dir="/Users/shemol/Downloads/arvix_paper"):
+    def __init__(self, download_dir="~/Downloads/arxiv_papers"):
         self.download_dir = Path(download_dir)
         self.base_url = "http://export.arxiv.org/api/query"
     
