@@ -339,16 +339,57 @@ const handleSearch = async () => {
     await searchFormRef.value.validate()
     searching.value = true
     
-    // Simulate API call
-    setTimeout(() => {
-      searchResults.value = generateMockResults()
-      totalResults.value = searchResults.value.length
-      searching.value = false
+    // Prepare search parameters
+    const searchParams = {
+      query: searchForm.query,
+      max_results: searchForm.maxResults,
+      date_from: searchForm.dateFrom || undefined,
+      date_to: searchForm.dateTo || undefined
+    }
+    
+    // Call real API
+    const response = await fetch('http://localhost:5001/api/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(searchParams)
+    })
+    
+    const data = await response.json()
+    
+    if (data.success && data.papers) {
+      // Transform API response to match frontend format
+      searchResults.value = data.papers.map(paper => ({
+        id: paper.id,
+        title: paper.title,
+        authors: paper.authors,
+        summary: paper.abstract || paper.summary,
+        abstract: paper.abstract || paper.summary,
+        published: paper.published,
+        categories: paper.categories,
+        pdf_url: paper.pdf_url,
+        arxiv_url: paper.arxiv_url,
+        url: paper.arxiv_url,
+        category: paper.categories?.[0] || 'Unknown',
+        downloading: false,
+        selected: false
+      }))
+      totalResults.value = data.total || searchResults.value.length
       ElMessage.success(`Found ${searchResults.value.length} related papers`)
-    }, 2000)
+    } else {
+      searchResults.value = []
+      totalResults.value = 0
+      ElMessage.error(data.error || 'Search failed')
+    }
     
   } catch (error) {
-    ElMessage.error('Search failed, please check input parameters')
+    console.error('Search failed:', error)
+    searchResults.value = []
+    totalResults.value = 0
+    ElMessage.error('Search request failed')
+  } finally {
+    searching.value = false
   }
 }
 

@@ -150,11 +150,19 @@ def search_papers():
         # Create downloader instance (use temporary directory for search)
         downloader = ArxivDownloader()
         
-        # Search papers
-        papers = downloader.search_papers(
+        # Use enhanced search API with date range support
+        from enhanced_arxiv_api import DateRange
+        date_range = None
+        if date_from or date_to:
+            date_range = DateRange(
+                start_date=date_from,
+                end_date=date_to
+            )
+        
+        # Search papers using enhanced API
+        papers = downloader.search_papers_enhanced(
             query=query,
-            date_from=date_from,
-            date_to=date_to,
+            date_range=date_range,
             max_results=max_results
         )
         
@@ -358,7 +366,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     
     print("Starting ArXiv Paper Downloader Web API...")
-    print("API URL: http://localhost:5001")
+    print("API URL: http://localhost:5002")
     print("Frontend URL: http://localhost:3000")
     
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=False)

@@ -144,20 +144,17 @@ class TestArxivDownloader:
         assert self.downloader.base_url == "http://export.arxiv.org/api/query"
     
     def test_search_papers_validation(self):
-        """Test search parameter validation"""
-        # Test invalid date format
-        with pytest.raises(ValidationError):
-            self.downloader.search_papers(date_from='invalid-date')
+        """Test search_papers_enhanced parameter validation"""
+        # Test empty query
+        with pytest.raises(ValueError):
+            self.downloader.search_papers_enhanced(query="", max_results=5)
         
-        with pytest.raises(ValidationError):
-            self.downloader.search_papers(date_to='2023/01/01')
+        # Test invalid max_results
+        with pytest.raises(ValueError):
+            self.downloader.search_papers_enhanced(query="test", max_results=0)
         
-        # Test invalid max results
-        with pytest.raises(ValidationError):
-            self.downloader.search_papers(max_results=0)
-        
-        with pytest.raises(ValidationError):
-            self.downloader.search_papers(max_results=-1)
+        with pytest.raises(ValueError):
+            self.downloader.search_papers_enhanced(query="test", max_results=-1)
     
     @patch('arxiv_downloader.requests.get')
     def test_search_papers_network_error(self, mock_get):
@@ -170,30 +167,41 @@ class TestArxivDownloader:
     
     @patch('arxiv_downloader.requests.get')
     def test_search_papers_success(self, mock_get):
-        """Test successful search"""
-        # Mock XML response
+        """Test successful search_papers_enhanced call"""
+        # Mock successful response
         mock_response = Mock()
-        mock_response.text = '''<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-    <entry>
-        <id>http://arxiv.org/abs/2023.01001v1</id>
-        <title>Test Paper Title</title>
-        <author><name>Test Author</name></author>
-        <summary>Test abstract content.</summary>
-        <published>2023-01-01T00:00:00Z</published>
-        <link type="application/pdf" href="http://arxiv.org/pdf/2023.01001v1.pdf"/>
-        <category term="cs.AI"/>
-    </entry>
-</feed>'''
-        mock_response.raise_for_status.return_value = None
+        mock_response.status_code = 200
+        mock_response.text = '''
+        <?xml version="1.0" encoding="UTF-8"?>
+        <feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+            <entry>
+                <id>http://arxiv.org/abs/2023.12345v1</id>
+                <title>Test Paper</title>
+                <summary>Test abstract</summary>
+                <author><name>Test Author</name></author>
+                <published>2023-01-01T00:00:00Z</published>
+                <updated>2023-01-01T00:00:00Z</updated>
+                <link href="http://arxiv.org/pdf/2023.12345v1.pdf" type="application/pdf"/>
+                <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+                <arxiv:comment>Test comment</arxiv:comment>
+                <arxiv:journal_ref>Test Journal</arxiv:journal_ref>
+                <arxiv:doi>10.1000/test</arxiv:doi>
+            </entry>
+        </feed>
+        '''
         mock_get.return_value = mock_response
         
-        papers = self.downloader.search_papers(max_results=1)
+        # Test search
+        papers = self.downloader.search_papers_enhanced(query="machine learning", max_results=1)
         
+        # Assertions
         assert len(papers) == 1
-        assert papers[0].id == '2023.01001v1'
-        assert papers[0].title == 'Test Paper Title'
-        assert 'Test Author' in papers[0].authors
+        assert papers[0].title == "Test Paper"
+        assert papers[0].id == "2023.12345v1"
+        assert "Test Author" in papers[0].authors
+        assert papers[0].comment == "Test comment"
+        assert papers[0].journal_ref == "Test Journal"
+        assert papers[0].doi == "10.1000/test"
     
     def test_parse_paper_entry_invalid(self):
         """Test parsing invalid paper entry"""

@@ -194,11 +194,18 @@ def main():
         print(f"Searching papers: {args.query}")
         if args.date_from or args.date_to:
             print(f"Date range: {args.date_from or 'unlimited'} to {args.date_to or 'unlimited'}")
+      # Search papers using enhanced API
+        from enhanced_arxiv_api import DateRange
+        date_range = None
+        if args.date_from or args.date_to:
+            date_range = DateRange(
+                start_date=args.date_from,
+                end_date=args.date_to
+            )
         
-        papers = downloader.search_papers(
+        papers = downloader.search_papers_enhanced(
             query=args.query,
-            date_from=args.date_from,
-            date_to=args.date_to,
+            date_range=date_range,
             max_results=args.max_results
         )
         

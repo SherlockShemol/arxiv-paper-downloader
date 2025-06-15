@@ -35,6 +35,9 @@ class Paper:
     pdf_url: str
     published: str
     categories: List[str]
+    comment: Optional[str] = None
+    journal_ref: Optional[str] = None
+    doi: Optional[str] = None
     
     def __post_init__(self):
         """Data validation"""

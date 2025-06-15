@@ -8,7 +8,30 @@
 - **Batch Download**: Support batch search and download of papers
 - **Error Handling**: Comprehensive exception handling and retry mechanism
 
-### 2. Async Downloader (`async_downloader.py`)
+### 2. Enhanced ArXiv API (`enhanced_arxiv_api.py`)
+- **Structured Queries**: Support for complex search parameters
+- **Multi-field Search**: Search by title, author, abstract, categories
+- **Date Range Filtering**: Flexible date range queries
+- **Sorting Options**: Multiple sorting criteria (relevance, date, etc.)
+- **Category Filtering**: Filter by arXiv categories
+- **Batch ID Queries**: Retrieve papers by arXiv IDs
+- **Convenience Functions**: Pre-built search functions
+
+```python
+# Usage example with Enhanced API
+from enhanced_arxiv_api import EnhancedArxivAPI, DateRange, SortBy
+
+with EnhancedArxivAPI() as api:
+    papers = api.search_papers(
+        query="machine learning",
+        max_results=10,
+        date_range=DateRange("2023-01-01", "2023-12-31"),
+        categories=["cs.AI", "cs.LG"],
+        sort_by=SortBy.RELEVANCE
+    )
+```
+
+### 3. Async Downloader (`async_downloader.py`)
 - **High Concurrency Download**: Support simultaneous download of multiple papers
 - **Async Context Management**: Automatically manage HTTP sessions
 - **Progress Tracking**: Real-time download progress display
@@ -23,7 +46,7 @@ result = await download_papers_async(papers, download_dir="./downloads", max_con
 print(f"Successfully downloaded: {result['successful']} papers")
 ```
 
-### 3. Plugin System (`plugins.py`)
+### 4. Plugin System (`plugins.py`)
 
 #### Available Plugins:
 - **DuplicateCheckPlugin**: Duplicate file checking
@@ -39,10 +62,10 @@ manager = create_default_plugins("./downloads")
 # Plugins will automatically execute corresponding operations before and after download
 ```
 
-### 4. Command Line Interface (`cli.py`)
+### 5. Command Line Interface (`cli.py`)
 
 ```bash
-# Basic search and download
+# Basic search and download (now uses enhanced API)
 python cli.py --query "machine learning" --max-results 10
 
 # Async download (faster)
@@ -58,27 +81,28 @@ python cli.py --query "neural networks" --download-dir "./my_papers"
 python cli.py --query "computer vision" --enable-plugins "duplicate_check,metadata"
 ```
 
-### 5. Enhanced Data Models (`models.py`)
+### 6. Enhanced Data Models (`models.py`)
+- **Extended Paper Model**: Added comment, journal_ref, and doi fields
 - **Data Validation**: Automatically validate paper data integrity
 - **Type Hints**: Complete type annotation support
 - **Exception Handling**: Specialized exception types
 
-### 6. Configuration Management (`config.py`)
+### 7. Configuration Management (`config.py`)
 - **Centralized Configuration**: Unified management of all configuration items
 - **Environment Adaptation**: Automatically adapt to different operating systems
 - **Path Management**: Intelligent path processing
 
-### 7. Cache System (`cache.py`)
+### 8. Cache System (`cache.py`)
 - **Search Result Caching**: Avoid duplicate API calls
 - **Smart Expiration**: Time-based cache expiration
 - **Storage Optimization**: Efficient JSON storage
 
-### 8. Logging System (`logger.py`)
+### 9. Logging System (`logger.py`)
 - **Multi-level Logging**: Support DEBUG, INFO, WARNING, ERROR levels
 - **File Logging**: Automatically save to log files
 - **Formatted Output**: Clear log format
 
-### 9. Utility Functions (`utils.py`)
+### 10. Utility Functions (`utils.py`)
 - **Filename Cleaning**: Automatically handle special characters
 - **Hash Generation**: Query result hashing
 - **Path Processing**: Cross-platform path operations

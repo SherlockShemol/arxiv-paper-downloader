@@ -128,14 +128,37 @@ python cli.py --query "computer vision" --enable-plugins "duplicate_check,metada
 
 ### 🐍 Python API Usage
 
-#### Synchronous Download
+#### Enhanced API (Recommended)
+```python
+from arxiv_downloader import ArxivDownloader
+from enhanced_arxiv_api import DateRange
+
+# Create downloader instance
+downloader = ArxivDownloader(download_dir="./papers")
+
+# Search using enhanced API with structured parameters
+papers = downloader.search_papers_enhanced(
+    query="machine learning",
+    max_results=10,
+    date_range=DateRange(
+        start_date="2023-01-01",
+        end_date="2023-12-31"
+    ),
+    categories=["cs.AI", "cs.LG"]
+)
+
+# Download papers
+downloader.download_papers(papers)
+```
+
+#### Legacy API (Still Supported)
 ```python
 from arxiv_downloader import ArxivDownloader
 
 # Create downloader instance
 downloader = ArxivDownloader(download_dir="./papers")
 
-# Search and download papers
+# Search using legacy API
 papers = downloader.search_papers(
     query="machine learning",
     max_results=10,

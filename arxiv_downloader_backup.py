@@ -22,14 +22,6 @@ from utils import (
     ensure_directory, is_valid_date_format, clean_text,
     validate_url, generate_unique_filename
 )
-from enhanced_arxiv_api import (
-    EnhancedArxivAPI, 
-    SearchQuery, 
-    SearchField, 
-    DateRange, 
-    SortBy, 
-    SortOrder
-)
 
 class ArxivDownloader(LoggerMixin):
     """ArXiv paper downloader"""
@@ -52,44 +44,10 @@ class ArxivDownloader(LoggerMixin):
         
         self.log_info(f"ArXiv downloader initialized, download directory: {self.download_dir}")
     
-    def search_papers_enhanced(self, 
-                              query: Optional[str] = None,
-                              date_range: Optional[DateRange] = None,
-                              max_results: int = Config.DEFAULT_MAX_RESULTS,
-                              sort_by: SortBy = SortBy.RELEVANCE,
-                              sort_order: SortOrder = SortOrder.DESCENDING,
-                              categories: Optional[List[str]] = None,
-                              arxiv_ids: Optional[List[str]] = None) -> List[Paper]:
-        """Enhanced search for ArXiv papers using the new API
-        
-        Args:
-            query: Search query
-            date_range: Date range for filtering
-            max_results: Maximum number of results
-            sort_by: Sort criteria
-            sort_order: Sort order
-            categories: List of categories to filter
-            arxiv_ids: List of specific ArXiv IDs to fetch
-        
-        Returns:
-            List of papers
-        """
-        api = EnhancedArxivAPI()
-        return api.search_papers(
-            query=query,
-            date_range=date_range,
-            max_results=max_results,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            categories=categories,
-            id_list=arxiv_ids
-        )
-    
     def search_papers(self, query: str = Config.DEFAULT_QUERY, 
                      date_from: Optional[str] = None, 
                      date_to: Optional[str] = None, 
-                     max_results: int = Config.DEFAULT_MAX_RESULTS,
-                     categories: List[str] = None) -> List[Paper]:
+                     max_results: int = Config.DEFAULT_MAX_RESULTS) -> List[Paper]:
         """Search ArXiv papers
         
         Args:
@@ -118,61 +76,11 @@ class ArxivDownloader(LoggerMixin):
         
         # Check cache
         query_hash = generate_query_hash(query, date_from, date_to, max_results)
-        
         cached_results = self.cache_manager.get_search_results(query_hash)
+        
         if cached_results is not None:
             self.log_info(f"Retrieved search results from cache, {len(cached_results)} papers total")
             return [Paper(**paper_data) for paper_data in cached_results]
-    
-    def _generate_cache_key(self, query: str, max_results: int, 
-                           date_from: str = None, date_to: str = None,
-                           categories: List[str] = None) -> str:
-        """Generate cache key for search parameters"""
-        key_parts = [query, str(max_results)]
-        if date_from:
-            key_parts.append(f"from:{date_from}")
-        if date_to:
-            key_parts.append(f"to:{date_to}")
-        if categories:
-            cats_str = ",".join(sorted(categories))
-            key_parts.append(f"cats:{cats_str}")
-        return "|".join(key_parts)
-    
-    def _generate_enhanced_cache_key(self, query: str = None, 
-                                   search_field: SearchField = SearchField.ALL,
-                                   max_results: int = None,
-                                   date_from: str = None, 
-                                   date_to: str = None,
-                                   categories: List[str] = None,
-                                   sort_by: SortBy = SortBy.RELEVANCE,
-                                   sort_order: SortOrder = SortOrder.DESCENDING,
-                                   arxiv_ids: List[str] = None) -> str:
-        """Generate cache key for enhanced search parameters"""
-        key_parts = ["enhanced"]
-        
-        if query:
-            key_parts.append(f"q:{query}")
-            key_parts.append(f"field:{search_field.value}")
-        
-        if arxiv_ids:
-            ids_str = ",".join(sorted(arxiv_ids))
-            key_parts.append(f"ids:{ids_str}")
-        
-        if max_results:
-            key_parts.append(f"max:{max_results}")
-        
-        if date_from:
-            key_parts.append(f"from:{date_from}")
-        if date_to:
-            key_parts.append(f"to:{date_to}")
-        
-        if categories:
-            cats_str = ",".join(sorted(categories))
-            key_parts.append(f"cats:{cats_str}")
-        
-        key_parts.append(f"sort:{sort_by.value}:{sort_order.value}")
-        
-        return "|".join(key_parts)
         
         # Build search query
         search_query = query
@@ -193,16 +101,18 @@ class ArxivDownloader(LoggerMixin):
             'search_query': search_query,
             'start': 0,
             'max_results': max_results,
-            'sortBy': 'relevance',
+            'sortBy': 'submittedDate',
             'sortOrder': 'descending'
         }
         
+        self.log_info(f"Search query: {search_query}")
         self.log_info("Searching ArXiv papers...")
         
         try:
             response = self._make_request_with_retry(self.base_url, params)
             papers = self._parse_arxiv_response(response.text)
             
+            # Cache search results
             paper_data_list = [self._paper_to_dict(paper) for paper in papers]
             self.cache_manager.save_search_results(query_hash, paper_data_list)
             
