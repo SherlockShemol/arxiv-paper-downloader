@@ -110,15 +110,33 @@ RECOMMENDED_KEYWORDS = [
     "semi-supervised learning"
 ]
 
+@app.route('/api/search', methods=['POST'])
 @app.route('/api/papers/search', methods=['GET'])
 def search_papers():
     """Search papers"""
     try:
-        # Get search parameters
-        query = request.args.get('query', '')
-        max_results = int(request.args.get('max_results', 10))
-        date_from = request.args.get('date_from')
-        date_to = request.args.get('date_to')
+        # Get search parameters from both GET args and POST JSON
+        if request.method == 'POST':
+            # Debug: log raw request data
+            app.logger.info(f"POST request content type: {request.content_type}")
+            app.logger.info(f"POST request data: {request.get_data()}")
+            
+            try:
+                data = request.get_json(force=True) or {}
+            except Exception as e:
+                app.logger.error(f"JSON parsing error: {e}")
+                # Try to get data from form if JSON fails
+                data = request.form.to_dict() if request.form else {}
+            
+            query = data.get('query', '')
+            max_results = int(data.get('max_results', 10))
+            date_from = data.get('date_from')
+            date_to = data.get('date_to')
+        else:
+            query = request.args.get('query', '')
+            max_results = int(request.args.get('max_results', 10))
+            date_from = request.args.get('date_from')
+            date_to = request.args.get('date_to')
         
         # Validate date format
         if date_from and not _validate_date_format(date_from):
@@ -299,6 +317,15 @@ def get_keyword_recommendations():
         app.logger.error(f"Failed to get recommended keywords: {str(e)}")
         return jsonify({'error': f'Failed to get recommended keywords: {str(e)}'}), 500
 
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.now().isoformat(),
+        'service': 'ArXiv Paper Downloader API'
+    })
+
 @app.route('/api', methods=['GET'])
 def api_info():
     """API information interface"""
@@ -306,6 +333,7 @@ def api_info():
         'message': 'ArXiv Paper Downloader API',
         'version': '1.0.0',
         'endpoints': {
+            'health': '/api/health',
             'search': '/api/papers/search',
             'download': '/api/papers/download',
             'downloads': '/api/downloads',
