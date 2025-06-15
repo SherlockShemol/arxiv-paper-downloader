@@ -1,10 +1,18 @@
 # ArXiv 论文下载器
 
-一个功能强大的 ArXiv 论文搜索和下载工具，支持同步/异步下载、插件系统和命令行界面。
+一个功能强大的 ArXiv 论文搜索和下载工具，提供 **Web 界面**、**命令行工具** 和 **Python API** 三种使用方式，支持同步/异步下载、插件系统和智能管理功能。
 
-## 🚀 主要特性
+## 🌟 项目亮点
 
-### 核心功能
+### 🖥️ **现代化 Web 界面**
+- 🎨 **直观易用**: 基于 Vue.js 的现代化用户界面
+- 🔍 **实时搜索**: 支持关键词、日期范围、分类筛选
+- 📱 **响应式设计**: 完美适配桌面和移动设备
+- 📊 **可视化管理**: 下载历史、统计图表、进度跟踪
+- 🎯 **智能推荐**: 基于搜索历史的关键词推荐
+- 📁 **自定义路径**: 用户可选择下载目录
+
+### 🚀 核心功能
 - 🔍 **智能搜索**: 支持关键词、作者、分类等多种搜索方式
 - 📁 **智能文件命名**: 自动清理文件名，避免特殊字符问题
 - ⏰ **时间戳防覆盖**: 自动为重复文件添加时间戳
@@ -21,30 +29,85 @@
 - 🎯 **智能过滤**: 按分类、日期、作者等条件过滤
 - 📈 **性能优化**: 内存优化和网络优化
 - 🔧 **配置管理**: 灵活的配置系统
+- 🌐 **RESTful API**: 完整的后端API接口
 
-## 安装依赖
+## 🛠️ 快速开始
 
-```bash
-pip3 install requests
-```
-
-## 📖 使用方法
-
-### 🔧 安装
+### 📦 安装依赖
 
 ```bash
 # 克隆仓库
-git clone <repository-url>
+git clone https://github.com/your-username/arxiv-paper-downloader.git
 cd arxiv_paper_download
 
-# 安装依赖
-pip install -r requirements.txt
+# 安装后端依赖
+pip install -r requirements_backend.txt
 
-# 或者使用setup.py安装
-pip install .
+# 安装前端依赖
+cd frontend
+npm install
+cd ..
 ```
 
-### 💻 命令行使用（推荐）
+### 🚀 启动应用
+
+#### 方式一：Web 界面（推荐）
+
+```bash
+# 启动后端服务器
+python app.py
+
+# 在新终端启动前端服务器
+cd frontend
+npm run dev
+```
+
+然后在浏览器中访问 `http://localhost:3000` 即可使用 Web 界面。
+
+#### 方式二：命令行工具
+
+```bash
+# 基本使用
+python cli.py --query "machine learning" --max-results 10
+
+# 异步下载（更快）
+python cli.py --query "deep learning" --async --max-concurrent 5
+```
+
+#### 方式三：Python API
+
+```python
+from arxiv_downloader import ArxivDownloader
+
+# 创建下载器实例
+downloader = ArxivDownloader(download_dir="./papers")
+
+# 搜索并下载论文
+papers = downloader.search_papers("machine learning", max_results=10)
+downloader.download_papers(papers)
+```
+
+## 📖 详细使用指南
+
+### 🌐 Web 界面功能
+
+#### 主要功能
+- **📝 论文搜索**: 支持关键词搜索，可设置日期范围和最大结果数
+- **📊 搜索结果**: 显示论文标题、作者、摘要、发布日期等详细信息
+- **⬇️ 一键下载**: 点击下载按钮即可下载PDF，支持自定义下载路径
+- **📈 下载历史**: 查看所有下载记录，包括状态和进度
+- **🎯 关键词推荐**: 基于搜索历史智能推荐相关关键词
+- **📱 响应式设计**: 完美适配各种设备屏幕
+
+#### 使用步骤
+1. 在搜索框中输入关键词（如："machine learning"、"transformer"等）
+2. 可选择设置日期范围和最大结果数
+3. 点击"搜索论文"按钮
+4. 在搜索结果中点击"下载 PDF"按钮
+5. 选择下载路径（首次使用需要设置）
+6. 在"下载历史"中查看下载状态
+
+### 💻 命令行使用
 
 ```bash
 # 基本搜索和下载
@@ -313,6 +376,127 @@ python3 rename_existing_papers.py
 
 如果遇到问题，可以修改脚本添加更详细的日志输出。
 
-## 许可证
+## 🏗️ 技术栈
 
-本项目采用MIT许可证。
+### 后端
+- **Python 3.7+**: 主要编程语言
+- **Flask**: Web 框架，提供 RESTful API
+- **Requests**: HTTP 请求库，用于与 ArXiv API 交互
+- **Flask-CORS**: 跨域资源共享支持
+
+### 前端
+- **Vue.js 3**: 现代化前端框架
+- **Vite**: 快速构建工具
+- **CSS3**: 响应式样式设计
+- **JavaScript ES6+**: 现代 JavaScript 特性
+
+### 核心依赖
+- **ArXiv API**: 论文数据来源
+- **PDF 处理**: 自动下载和管理 PDF 文件
+- **异步处理**: 支持高并发下载
+
+## 📁 项目结构
+
+```
+arxiv_paper_download/
+├── 📄 app.py                 # Flask 后端服务器
+├── 📄 arxiv_downloader.py     # 核心下载器类
+├── 📄 async_downloader.py     # 异步下载器
+├── 📄 cli.py                  # 命令行界面
+├── 📄 plugins.py              # 插件系统
+├── 📄 models.py               # 数据模型
+├── 📄 config.py               # 配置管理
+├── 📄 utils.py                # 工具函数
+├── 📄 logger.py               # 日志系统
+├── 📄 cache.py                # 缓存机制
+├── 📄 requirements_backend.txt # 后端依赖
+├── 📄 requirements.txt        # 基础依赖
+├── 📁 frontend/               # 前端应用
+│   ├── 📄 package.json        # 前端依赖配置
+│   ├── 📄 vite.config.js      # Vite 配置
+│   ├── 📄 index.html          # 主页面
+│   └── 📁 src/                # 源代码
+│       ├── 📄 App.vue         # 主应用组件
+│       ├── 📄 main.js         # 应用入口
+│       ├── 📁 api/            # API 接口
+│       ├── 📁 styles/         # 样式文件
+│       └── 📁 views/          # 页面组件
+└── 📄 README.md               # 项目文档
+```
+
+## 🔧 API 接口
+
+### 搜索论文
+```http
+POST /api/papers/search
+Content-Type: application/json
+
+{
+  "query": "machine learning",
+  "max_results": 10,
+  "date_from": "2023-01-01",
+  "date_to": "2023-12-31"
+}
+```
+
+### 下载论文
+```http
+POST /api/papers/download
+Content-Type: application/json
+
+{
+  "paper_id": "2301.12345v1",
+  "title": "Paper Title",
+  "download_path": "/path/to/download"
+}
+```
+
+### 获取下载历史
+```http
+GET /api/downloads
+```
+
+### 获取推荐关键词
+```http
+GET /api/keywords/recommendations
+```
+
+## 🤝 贡献指南
+
+欢迎贡献代码！请遵循以下步骤：
+
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
+
+## 📝 更新日志
+
+### v2.0.0 (最新)
+- ✨ 新增现代化 Web 界面
+- ✨ 支持用户自定义下载路径
+- ✨ 添加关键词推荐功能
+- ✨ 完整的 RESTful API
+- 🐛 修复论文 ID 版本号处理问题
+- 🎨 优化用户界面和体验
+
+### v1.0.0
+- ✨ 基础命令行工具
+- ✨ 异步下载支持
+- ✨ 插件系统
+- ✨ 智能文件命名
+
+## 📄 许可证
+
+本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
+
+## 🙏 致谢
+
+- [ArXiv](https://arxiv.org/) - 提供开放的学术论文数据
+- [Vue.js](https://vuejs.org/) - 优秀的前端框架
+- [Flask](https://flask.palletsprojects.com/) - 轻量级 Web 框架
+
+---
+
+如果这个项目对您有帮助，请给个 ⭐ Star！
