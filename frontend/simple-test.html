@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单Vue测试</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .loading { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Vue 3 测试页面</h1>
+    
+    <div id="loading" class="loading">正在加载...</div>
+    
+    <div id="app"></div>
+    
+    <script>
+        console.log('页面开始加载')
+        console.log('Vue版本:', Vue.version)
+        
+        const { createApp } = Vue
+        
+        const app = createApp({
+            data() {
+                return {
+                    message: 'Hello Vue 3!',
+                    currentTime: new Date().toLocaleString(),
+                    status: 'Vue应用已成功加载并运行!'
+                }
+            },
+            mounted() {
+                console.log('Vue组件已挂载')
+                // 隐藏loading
+                const loading = document.getElementById('loading')
+                if (loading) {
+                    loading.style.display = 'none'
+                    console.log('loading已隐藏')
+                }
+            },
+            template: `
+                <div>
+                    <h2 class="success">{{ message }}</h2>
+                    <p>当前时间: {{ currentTime }}</p>
+                    <p class="success">{{ status }}</p>
+                    <button @click="updateTime">更新时间</button>
+                </div>
+            `,
+            methods: {
+                updateTime() {
+                    this.currentTime = new Date().toLocaleString()
+                    console.log('时间已更新')
+                }
+            }
+        })
+        
+        try {
+            app.mount('#app')
+            console.log('Vue应用挂载成功')
+        } catch (error) {
+            console.error('Vue应用挂载失败:', error)
+            document.getElementById('app').innerHTML = '<p class="error">Vue应用加载失败: ' + error.message + '</p>'
+        }
+    </script>
+</body>
+</html>

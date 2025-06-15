@@ -431,6 +431,50 @@ class ArxivDownloader(LoggerMixin):
         except Exception as e:
             self.log_error(f"生成总结文档失败: {e}")
     
+    def download_paper_by_id(self, paper_id: str) -> bool:
+        """通过论文ID下载单篇论文
+        
+        Args:
+            paper_id: ArXiv论文ID (例如: 2301.00001 或 2301.00001v1)
+        
+        Returns:
+            是否下载成功
+        """
+        try:
+            # 去掉版本号（如果存在）
+            # ArXiv ID格式: YYMM.NNNNN[vN]
+            clean_paper_id = paper_id
+            if 'v' in paper_id:
+                clean_paper_id = paper_id.split('v')[0]
+            
+            # 构建搜索查询，通过ID精确搜索
+            query = f"id:{clean_paper_id}"
+            
+            self.log_info(f"搜索论文ID: {paper_id} (清理后: {clean_paper_id})")
+            
+            # 搜索论文
+            papers = self.search_papers(query=query, max_results=1)
+            
+            if not papers:
+                self.log_error(f"未找到论文ID: {paper_id} (搜索ID: {clean_paper_id})")
+                return False
+            
+            paper = papers[0]
+            
+            # 下载论文
+            success = self.download_pdf(paper)
+            
+            if success:
+                self.log_info(f"论文下载成功: {paper.title}")
+            else:
+                self.log_error(f"论文下载失败: {paper.title}")
+            
+            return success
+            
+        except Exception as e:
+            self.log_error(f"下载论文 {paper_id} 时发生错误: {e}")
+            return False
+    
     def _paper_to_dict(self, paper: Paper) -> Dict[str, Any]:
         """将Paper对象转换为字典"""
         return {

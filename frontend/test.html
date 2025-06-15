@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue测试页面</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div id="loading" style="color: blue;">正在加载...</div>
+    </div>
+    
+    <script>
+        console.log('测试页面开始加载')
+        
+        const { createApp } = Vue
+        
+        const app = createApp({
+            data() {
+                return {
+                    message: 'Hello Vue!',
+                    loaded: false
+                }
+            },
+            mounted() {
+                console.log('Vue组件已挂载')
+                this.loaded = true
+                // 移除loading
+                const loading = document.getElementById('loading')
+                if (loading) {
+                    loading.remove()
+                    console.log('loading元素已移除')
+                }
+            },
+            template: `
+                <div>
+                    <h1>{{ message }}</h1>
+                    <p v-if="loaded">Vue应用已成功加载!</p>
+                </div>
+            `
+        })
+        
+        try {
+            app.mount('#app')
+            console.log('Vue应用挂载成功')
+        } catch (error) {
+            console.error('Vue应用挂载失败:', error)
+        }
+    </script>
+</body>
+</html>
