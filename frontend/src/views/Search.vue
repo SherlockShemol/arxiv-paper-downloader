@@ -465,34 +465,36 @@ const viewPaperDetail = (paper) => {
 // Download single paper
 const downloadPaper = async (paper) => {
   try {
+    const downloadPath = './arxiv_papers'
+    await useAppStore().downloadPaper(paper, downloadPath)
     ElMessage.success(`Starting download: ${paper.title}`)
-    // Should call actual download API here
   } catch (error) {
     ElMessage.error('Download failed')
+    console.error('Download error:', error)
   }
 }
 
+
+
 // Batch download
-const handleBatchDownload = async () => {
-  try {
-    const result = await ElMessageBox.confirm(
-      `Are you sure you want to download the selected ${selectedPapers.value.length} papers?`,
-      'Batch Download Confirmation',
-      {
-        confirmButtonText: 'Confirm',
-        cancelButtonText: 'Cancel',
-        type: 'warning'
-      }
-    )
-    
-    if (result === 'confirm') {
-      ElMessage.success(`Starting batch download of ${selectedPapers.value.length} papers`)
-      // Should call actual batch download API here
+  const handleBatchDownload = async () => {
+    if (selectedPapers.value.length === 0) {
+      ElMessage.warning('Please select papers to download')
+      return
     }
-  } catch (error) {
-    // User cancelled
+
+    try {
+      const downloadPath = './arxiv_papers'
+      for (const paper of selectedPapers.value) {
+        await useAppStore().downloadPaper(paper, downloadPath)
+      }
+      ElMessage.success(`Starting batch download of ${selectedPapers.value.length} papers`)
+      selectedPapers.value = []
+    } catch (error) {
+      ElMessage.error('Batch download failed')
+      console.error('Batch download error:', error)
+    }
   }
-}
 
 // Pagination handling
 const handleSizeChange = (val) => {

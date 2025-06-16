@@ -187,9 +187,13 @@ export const api = {
   },
 
   // Download paper
-  async downloadPaper(paperId: string): Promise<ApiResponse<{ download_id: string }>> {
+  async downloadPaper(paper: { id: string; title: string; download_path?: string }): Promise<ApiResponse<{ download_id: string }>> {
     try {
-      const response = await apiClient.post('/download', { paper_id: paperId })
+      const response = await apiClient.post('/papers/download', { 
+        paper_id: paper.id,
+        title: paper.title,
+        download_path: paper.download_path || './downloads'
+      })
       return {
         success: true,
         data: response.data,

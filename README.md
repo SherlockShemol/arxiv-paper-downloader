@@ -183,7 +183,7 @@ python cli.py --query "deep learning" --async --max-concurrent 5
 # Filter by category and date
 python cli.py --query "AI" --categories "cs.AI,cs.LG" --date-from 2023-01-01
 
-# Custom download directory
+# Custom download directory (default: ./arxiv_papers)
 python cli.py --query "neural networks" --download-dir "./my_papers"
 
 # Enable plugins
@@ -323,7 +323,7 @@ python3 arxiv_downloader.py --query "cat:cs.LG"
 # Search papers containing specific keywords
 python3 arxiv_downloader.py --query "all:transformer AND cat:cs.AI"
 
-# Specify download directory
+# Specify download directory (default: ./arxiv_papers)
 python3 arxiv_downloader.py --download-dir "/path/to/your/directory"
 ```
 
@@ -335,7 +335,7 @@ python3 arxiv_downloader.py --download-dir "/path/to/your/directory"
 | `--date-from` | Start date (YYYY-MM-DD) | None |
 | `--date-to` | End date (YYYY-MM-DD) | None |
 | `--max-results` | Maximum number of results | 10 |
-| `--download-dir` | Download directory | `~/Downloads/arxiv_papers` |
+| `--download-dir` | Download directory | `./arxiv_papers` |
 | `--today` | Download today's papers | - |
 | `--yesterday` | Download yesterday's papers | - |
 | `--last-week` | Download papers from the last week | - |
@@ -397,6 +397,22 @@ Downloaded files will be saved in the specified directory:
 - `{Paper Title}_{Paper ID}.pdf` - If title duplicates, ID suffix will be added
 - `Download Summary_{YYYYMMDD_HHMM}.md` - Download summary document (with timestamp to avoid overwriting)
 
+### Default Directory Structure
+
+By default, all files are organized in the `./arxiv_papers` directory:
+
+```
+./arxiv_papers/
+├── .cache/                    # Cache directory for search results and paper metadata
+│   ├── papers/               # Paper information cache
+│   └── searches/             # Search results cache
+├── {Paper Title 1}.pdf       # Downloaded PDF files
+├── {Paper Title 2}.pdf
+└── Download Summary_*.md     # Download summary documents
+```
+
+**Note**: The `./arxiv_papers` directory is automatically added to `.gitignore` to prevent downloaded papers and cache files from being tracked by Git.
+
 ### File Naming Rules
 
 - Use paper title as primary filename
@@ -423,8 +439,8 @@ Found 15 papers, starting download...
 ...
 
 Download completed! Successfully downloaded 15/15 papers
-Files saved in: ~/Downloads/arxiv_papers
-Summary document generated: ~/Downloads/arxiv_papers/Download Summary.md
+Files saved in: ./arxiv_papers
+Summary document generated: ./arxiv_papers/Download Summary.md
 ```
 
 ## Batch Rename Existing Files

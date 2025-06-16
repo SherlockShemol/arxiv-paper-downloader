@@ -1,91 +1,91 @@
-"""ArXiv AI Paper Automatic Downloader - Refactored Version
-
-Support searching and downloading AI-related papers with specified date ranges
-Features comprehensive error handling, caching mechanism, logging system and type hints
-"""
-
-import argparse
+import os
+import re
 import time
-import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import List, Optional, Dict, Any
-
 import requests
+import xml.etree.ElementTree as ET
+from pathlib import Path
+from typing import List, Dict, Any, Optional
+from urllib.parse import quote_plus
+from dataclasses import dataclass
+from enum import Enum
 
+from models import Paper, ValidationError, NetworkError, ParseError
 from config import Config
-from models import Paper, DownloadStats, NetworkError, FileOperationError, ParseError, ValidationError
-from logger import setup_logging, LoggerMixin
+from logger import get_logger
 from cache import CacheManager
 from utils import (
-    sanitize_filename, generate_query_hash, get_file_size_mb,
-    ensure_directory, is_valid_date_format, clean_text,
-    validate_url, generate_unique_filename
-)
-from enhanced_arxiv_api import (
-    EnhancedArxivAPI, 
-    SearchQuery, 
-    SearchField, 
-    DateRange, 
-    SortBy, 
-    SortOrder
+    sanitize_filename, 
+    is_valid_date_format, 
+    generate_query_hash
 )
 
-class ArxivDownloader(LoggerMixin):
-    """ArXiv paper downloader"""
+class SearchField(Enum):
+    """Search field enumeration"""
+    ALL = "all"
+    TITLE = "ti"
+    AUTHOR = "au"
+    ABSTRACT = "abs"
+    COMMENT = "co"
+    JOURNAL = "jr"
+    CATEGORY = "cat"
+    REPORT_NUMBER = "rn"
+    ID = "id"
+
+class SortBy(Enum):
+    """Sort by enumeration"""
+    RELEVANCE = "relevance"
+    LAST_UPDATED_DATE = "lastUpdatedDate"
+    SUBMITTED_DATE = "submittedDate"
+
+class SortOrder(Enum):
+    """Sort order enumeration"""
+    ASCENDING = "ascending"
+    DESCENDING = "descending"
+
+@dataclass
+class DownloadStats:
+    """Download statistics"""
+    total_papers: int = 0
+    successful_downloads: int = 0
+    failed_downloads: int = 0
     
-    def __init__(self, download_dir: Optional[str] = None):
-        """Initialize downloader
-        
-        Args:
-            download_dir: Download directory path
-        """
-        self.download_dir = Config.get_download_dir(download_dir)
-        ensure_directory(self.download_dir)
+    def add_success(self):
+        self.successful_downloads += 1
+    
+    def add_failure(self):
+        self.failed_downloads += 1
+    
+    @property
+    def success_rate(self) -> float:
+        if self.total_papers == 0:
+            return 0.0
+        return (self.successful_downloads / self.total_papers) * 100
+
+class ArxivDownloader:
+    """ArXiv paper downloader with enhanced search capabilities"""
+    
+    def __init__(self, download_dir: str = Config.DEFAULT_DOWNLOAD_DIR):
+        self.download_dir = Path(download_dir)
+        self.download_dir.mkdir(parents=True, exist_ok=True)
         
         self.base_url = "http://export.arxiv.org/api/query"
-        self.stats = DownloadStats()
+        self.logger = get_logger()
         self.cache_manager = CacheManager()
-        
-        # Setup logging
-        setup_logging(log_dir=Config.get_log_dir(self.download_dir))
-        
-        self.log_info(f"ArXiv downloader initialized, download directory: {self.download_dir}")
+        self.stats = DownloadStats()
     
-    def search_papers_enhanced(self, 
-                              query: Optional[str] = None,
-                              date_range: Optional[DateRange] = None,
-                              max_results: int = Config.DEFAULT_MAX_RESULTS,
-                              sort_by: SortBy = SortBy.RELEVANCE,
-                              sort_order: SortOrder = SortOrder.DESCENDING,
-                              categories: Optional[List[str]] = None,
-                              arxiv_ids: Optional[List[str]] = None) -> List[Paper]:
-        """Enhanced search for ArXiv papers using the new API
-        
-        Args:
-            query: Search query
-            date_range: Date range for filtering
-            max_results: Maximum number of results
-            sort_by: Sort criteria
-            sort_order: Sort order
-            categories: List of categories to filter
-            arxiv_ids: List of specific ArXiv IDs to fetch
-        
-        Returns:
-            List of papers
-        """
-        api = EnhancedArxivAPI()
-        return api.search_papers(
-            query=query,
-            date_range=date_range,
-            max_results=max_results,
-            sort_by=sort_by,
-            sort_order=sort_order,
-            categories=categories,
-            id_list=arxiv_ids
-        )
+    def log_info(self, message: str):
+        """Log info message"""
+        self.logger.info(message)
     
-    def search_papers(self, query: str = Config.DEFAULT_QUERY, 
+    def log_warning(self, message: str):
+        """Log warning message"""
+        self.logger.warning(message)
+    
+    def log_error(self, message: str):
+        """Log error message"""
+        self.logger.error(message)
+    
+    def search_papers(self, query: str = Config.DEFAULT_QUERY,
                      date_from: Optional[str] = None, 
                      date_to: Optional[str] = None, 
                      max_results: int = Config.DEFAULT_MAX_RESULTS,
@@ -123,71 +123,9 @@ class ArxivDownloader(LoggerMixin):
         if cached_results is not None:
             self.log_info(f"Retrieved search results from cache, {len(cached_results)} papers total")
             return [Paper(**paper_data) for paper_data in cached_results]
-    
-    def _generate_cache_key(self, query: str, max_results: int, 
-                           date_from: str = None, date_to: str = None,
-                           categories: List[str] = None) -> str:
-        """Generate cache key for search parameters"""
-        key_parts = [query, str(max_results)]
-        if date_from:
-            key_parts.append(f"from:{date_from}")
-        if date_to:
-            key_parts.append(f"to:{date_to}")
-        if categories:
-            cats_str = ",".join(sorted(categories))
-            key_parts.append(f"cats:{cats_str}")
-        return "|".join(key_parts)
-    
-    def _generate_enhanced_cache_key(self, query: str = None, 
-                                   search_field: SearchField = SearchField.ALL,
-                                   max_results: int = None,
-                                   date_from: str = None, 
-                                   date_to: str = None,
-                                   categories: List[str] = None,
-                                   sort_by: SortBy = SortBy.RELEVANCE,
-                                   sort_order: SortOrder = SortOrder.DESCENDING,
-                                   arxiv_ids: List[str] = None) -> str:
-        """Generate cache key for enhanced search parameters"""
-        key_parts = ["enhanced"]
-        
-        if query:
-            key_parts.append(f"q:{query}")
-            key_parts.append(f"field:{search_field.value}")
-        
-        if arxiv_ids:
-            ids_str = ",".join(sorted(arxiv_ids))
-            key_parts.append(f"ids:{ids_str}")
-        
-        if max_results:
-            key_parts.append(f"max:{max_results}")
-        
-        if date_from:
-            key_parts.append(f"from:{date_from}")
-        if date_to:
-            key_parts.append(f"to:{date_to}")
-        
-        if categories:
-            cats_str = ",".join(sorted(categories))
-            key_parts.append(f"cats:{cats_str}")
-        
-        key_parts.append(f"sort:{sort_by.value}:{sort_order.value}")
-        
-        return "|".join(key_parts)
         
         # Build search query
-        search_query = query
-        
-        # Add date range filter
-        if date_from or date_to:
-            date_filter = "submittedDate:"
-            if date_from and date_to:
-                date_filter += f"[{date_from.replace('-', '')}0000+TO+{date_to.replace('-', '')}2359]"
-            elif date_from:
-                date_filter += f"[{date_from.replace('-', '')}0000+TO+*]"
-            elif date_to:
-                date_filter += f"[*+TO+{date_to.replace('-', '')}2359]"
-            
-            search_query += f"+AND+{date_filter}"
+        search_query = self._build_search_query(query, date_from, date_to)
         
         params = {
             'search_query': search_query,
@@ -211,6 +149,38 @@ class ArxivDownloader(LoggerMixin):
              
         except requests.RequestException as e:
             raise NetworkError(f"Search request failed: {e}")
+    
+    def _generate_cache_key(self, query: str, max_results: int, 
+                           date_from: str = None, date_to: str = None,
+                           categories: List[str] = None) -> str:
+        """Generate cache key for search parameters"""
+        key_parts = [query, str(max_results)]
+        if date_from:
+            key_parts.append(f"from:{date_from}")
+        if date_to:
+            key_parts.append(f"to:{date_to}")
+        if categories:
+            cats_str = ",".join(sorted(categories))
+            key_parts.append(f"cats:{cats_str}")
+        return "|".join(key_parts)
+    
+    def _build_search_query(self, query: str, date_from: str = None, date_to: str = None) -> str:
+        """Build search query with date filters"""
+        search_query = query
+        
+        # Add date range filter
+        if date_from or date_to:
+            date_filter = "submittedDate:"
+            if date_from and date_to:
+                date_filter += f"[{date_from.replace('-', '')}0000+TO+{date_to.replace('-', '')}2359]"
+            elif date_from:
+                date_filter += f"[{date_from.replace('-', '')}0000+TO+*]"
+            elif date_to:
+                date_filter += f"[*+TO+{date_to.replace('-', '')}2359]"
+            
+            search_query += f"+AND+{date_filter}"
+        
+        return search_query
     
     def _make_request_with_retry(self, url: str, params: Dict[str, Any], 
                                 max_retries: int = Config.MAX_RETRIES) -> requests.Response:
@@ -255,8 +225,6 @@ class ArxivDownloader(LoggerMixin):
         Raises:
             ParseError: XML parsing failed
         """
-        papers = []
-        
         try:
             root = ET.fromstring(xml_content)
             
@@ -266,93 +234,92 @@ class ArxivDownloader(LoggerMixin):
                 'arxiv': 'http://arxiv.org/schemas/atom'
             }
             
+            papers = []
             entries = root.findall('atom:entry', namespaces)
             
             for entry in entries:
                 try:
-                    paper_data = self._parse_paper_entry(entry, namespaces)
-                    if paper_data:
-                        paper = Paper(**paper_data)
+                    paper = self._parse_entry(entry, namespaces)
+                    if paper:
                         papers.append(paper)
-                        
-                except (ValidationError, KeyError) as e:
-                    self.log_warning(f"Skipping invalid paper entry: {e}")
+                except Exception as e:
+                    self.log_warning(f"Failed to parse entry: {e}")
                     continue
             
+            return papers
+            
         except ET.ParseError as e:
-            raise ParseError(f"XML parsing error: {e}")
-        
-        return papers
+            raise ParseError(f"XML parsing failed: {e}")
     
-    def _parse_paper_entry(self, entry: ET.Element, namespaces: Dict[str, str]) -> Optional[Dict[str, Any]]:
-        """Parse single paper entry
+    def _parse_entry(self, entry, namespaces: Dict[str, str]) -> Optional[Paper]:
+        """Parse single entry from ArXiv response
         
         Args:
             entry: XML entry element
             namespaces: XML namespaces
         
         Returns:
-            Paper data dictionary
+            Paper object or None if parsing failed
         """
-        paper_data = {}
-        
-        # Get ID
-        id_elem = entry.find('atom:id', namespaces)
-        if id_elem is None:
+        try:
+            # Extract basic information
+            title = entry.find('atom:title', namespaces)
+            title_text = title.text.strip().replace('\n', ' ') if title is not None else "Unknown Title"
+            
+            summary = entry.find('atom:summary', namespaces)
+            summary_text = summary.text.strip().replace('\n', ' ') if summary is not None else ""
+            
+            # Extract ArXiv ID from URL
+            id_elem = entry.find('atom:id', namespaces)
+            if id_elem is None:
+                return None
+            
+            arxiv_id = id_elem.text.split('/')[-1]
+            
+            # Extract authors
+            authors = []
+            author_elements = entry.findall('atom:author', namespaces)
+            for author_elem in author_elements:
+                name_elem = author_elem.find('atom:name', namespaces)
+                if name_elem is not None:
+                    authors.append(name_elem.text.strip())
+            
+            # Extract categories
+            categories = []
+            category_elements = entry.findall('atom:category', namespaces)
+            for cat_elem in category_elements:
+                term = cat_elem.get('term')
+                if term:
+                    categories.append(term)
+            
+            # Extract publication date
+            published = entry.find('atom:published', namespaces)
+            published_text = published.text if published is not None else ""
+            
+            # Extract PDF URL
+            pdf_url = ""
+            link_elements = entry.findall('atom:link', namespaces)
+            for link in link_elements:
+                if link.get('type') == 'application/pdf':
+                    pdf_url = link.get('href', '')
+                    break
+            
+            return Paper(
+                id=arxiv_id,
+                title=title_text,
+                authors=authors,
+                abstract=summary_text,
+                categories=categories,
+                published=published_text,
+                pdf_url=pdf_url
+            )
+            
+        except Exception as e:
+            self.log_warning(f"Failed to parse paper entry: {e}")
             return None
-        paper_data['id'] = id_elem.text.split('/')[-1]
-        
-        # Get title
-        title_elem = entry.find('atom:title', namespaces)
-        if title_elem is None:
-            return None
-        paper_data['title'] = clean_text(title_elem.text)
-        
-        # Get authors
-        authors = []
-        for author in entry.findall('atom:author', namespaces):
-            name_elem = author.find('atom:name', namespaces)
-            if name_elem is not None:
-                authors.append(name_elem.text.strip())
-        paper_data['authors'] = authors
-        
-        # Get abstract
-        summary_elem = entry.find('atom:summary', namespaces)
-        if summary_elem is not None:
-            paper_data['abstract'] = clean_text(summary_elem.text)
-        else:
-            paper_data['abstract'] = ""
-        
-        # Get PDF link
-        pdf_url = None
-        for link in entry.findall('atom:link', namespaces):
-            if link.get('type') == 'application/pdf':
-                pdf_url = link.get('href')
-                break
-        
-        if not pdf_url or not validate_url(pdf_url):
-            return None
-        paper_data['pdf_url'] = pdf_url
-        
-        # Get publication date
-        published_elem = entry.find('atom:published', namespaces)
-        if published_elem is not None:
-            paper_data['published'] = published_elem.text
-        else:
-            paper_data['published'] = ""
-        
-        # Get categories
-        categories = []
-        for category in entry.findall('atom:category', namespaces):
-            term = category.get('term')
-            if term:
-                categories.append(term)
-        paper_data['categories'] = categories
-        
-        return paper_data
     
     def download_pdf(self, paper: Paper) -> bool:
-        """Download PDF of a single paper
+        """Download single paper PDF
         
         Args:
             paper: Paper object
@@ -360,47 +327,90 @@ class ArxivDownloader(LoggerMixin):
         Returns:
             Whether download was successful
         """
-        # Generate filename
-        clean_title = sanitize_filename(paper.title)
-        filename = f"{clean_title}.pdf"
-        filepath = generate_unique_filename(self.download_dir, filename, paper.id)
-        
-        # Check if file already exists
-        if filepath.exists():
-            self.log_info(f"✓ File already exists: {filepath.name}")
-            self.stats.add_skip()
-            return True
-        
         try:
-            self.log_info(f"Downloading: {paper.title[:50]}...")
+            if not paper.pdf_url:
+                self.log_error(f"No PDF URL found for paper: {paper.title}")
+                return False
+            
+            # Generate filename
+            clean_title = sanitize_filename(paper.title)
+            filename = f"{clean_title}_{paper.id}.pdf"
+            filepath = self.download_dir / filename
+            
+            # Check if file already exists
+            if filepath.exists():
+                self.log_info(f"File already exists, skipping: {filename}")
+                return True
+            
+            self.log_info(f"Downloading: {paper.title}")
             
             # Download file
             response = self._download_with_retry(paper.pdf_url)
             
             # Save file
             with open(filepath, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=Config.CHUNK_SIZE):
+                for chunk in response.iter_content(chunk_size=8192):
                     if chunk:
                         f.write(chunk)
             
-            # Record statistics
-            file_size_mb = get_file_size_mb(filepath)
-            self.stats.add_success(file_size_mb)
-            
-            self.log_info(f"✓ Download completed: {filepath.name}")
+            self.log_info(f"Downloaded successfully: {filename}")
+            self.stats.add_success()
             return True
             
-        except (NetworkError, FileOperationError) as e:
-            self.log_error(f"✗ Download failed {filename}: {e}")
-            
-            # Delete incomplete file
-            if filepath.exists():
-                try:
+        except Exception as e:
+            self.log_error(f"Download failed for {paper.title}: {e}")
+            # Clean up partial file
+            try:
+                if 'filepath' in locals() and filepath.exists():
                     filepath.unlink()
-                except OSError:
-                    pass
+            except Exception:
+                pass
             
             self.stats.add_failure()
+            return False
+    
+    def download_paper_by_id(self, paper_id: str) -> bool:
+        """Download paper by ArXiv ID
+        
+        Args:
+            paper_id: ArXiv paper ID
+        
+        Returns:
+            Whether download was successful
+        """
+        try:
+            # Remove version number (if exists)
+            # ArXiv ID format: YYMM.NNNNN[vN]
+            clean_paper_id = paper_id
+            if 'v' in paper_id:
+                clean_paper_id = paper_id.split('v')[0]
+            
+            # Build search query for exact ID search
+            query = f"id:{clean_paper_id}"
+            
+            self.log_info(f"Searching paper ID: {paper_id} (cleaned: {clean_paper_id})")
+            
+            # Search papers
+            papers = self.search_papers(query=query, max_results=1)
+            
+            if not papers:
+                self.log_error(f"Paper ID not found: {paper_id} (search ID: {clean_paper_id})")
+                return False
+            
+            paper = papers[0]
+            
+            # Download paper
+            success = self.download_pdf(paper)
+            
+            if success:
+                self.log_info(f"Paper downloaded successfully: {paper.title}")
+            else:
+                self.log_error(f"Paper download failed: {paper.title}")
+            
+            return success
+            
+        except Exception as e:
+            self.log_error(f"Download by ID failed for {paper_id}: {e}")
             return False
     
     def _download_with_retry(self, url: str, max_retries: int = Config.MAX_RETRIES) -> requests.Response:
@@ -448,216 +458,30 @@ class ArxivDownloader(LoggerMixin):
         self.stats = DownloadStats()
         self.stats.total_papers = len(papers)
         
-        start_time = time.time()
-        
         for i, paper in enumerate(papers, 1):
-            self.log_info(f"[{i}/{len(papers)}] ", end="")
+            self.log_info(f"Processing paper {i}/{len(papers)}: {paper.title}")
             self.download_pdf(paper)
-            
-            # Add delay to avoid too frequent requests
-            if i < len(papers):
-                time.sleep(Config.REQUEST_DELAY)
         
-        # Calculate download time
-        self.stats.download_time_seconds = time.time() - start_time
-        
-        self.log_info(f"Download completed! {self.stats}")
-        self.log_info(f"Files saved in: {self.download_dir}")
-        
-        if self.stats.total_size_mb > 0:
-            self.log_info(f"Average download speed: {self.stats.average_speed_mbps:.2f} MB/s")
-    
-    def generate_summary(self, papers: List[Paper]) -> None:
-        """Generate download summary document
-        
-        Args:
-            papers: List of papers
-        """
-        if not papers:
-            return
-        
-        # Generate timestamped filename, accurate to minute
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M')
-        summary_file = self.download_dir / f"download_summary_{timestamp}.md"
-        
-        try:
-            with open(summary_file, 'w', encoding='utf-8') as f:
-                f.write("# ArXiv AI Paper Download Summary\n\n")
-                f.write(f"## Download Time\n{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-                f.write(f"## Statistics\n")
-                f.write(f"- Total papers: {self.stats.total_papers}\n")
-                f.write(f"- Successfully downloaded: {self.stats.successful_downloads}\n")
-                f.write(f"- Failed downloads: {self.stats.failed_downloads}\n")
-                f.write(f"- Skipped downloads: {self.stats.skipped_downloads}\n")
-                f.write(f"- Success rate: {self.stats.success_rate:.1%}\n")
-                if self.stats.total_size_mb > 0:
-                    f.write(f"- Total size: {self.stats.total_size_mb:.2f} MB\n")
-                    f.write(f"- Average speed: {self.stats.average_speed_mbps:.2f} MB/s\n")
-                f.write("\n## Paper List\n\n")
-                
-                for i, paper in enumerate(papers, 1):
-                    f.write(f"### {i}. {paper.title}\n")
-                    f.write(f"- **Paper ID**: {paper.id}\n")
-                    f.write(f"- **Authors**: {paper.authors_str}\n")
-                    f.write(f"- **Categories**: {paper.categories_str}\n")
-                    f.write(f"- **Published**: {paper.published}\n")
-                    f.write(f"- **Abstract**: {paper.short_abstract}\n")
-                    
-                    # Determine the actual filename
-                    clean_title = sanitize_filename(paper.title)
-                    filename = f"{clean_title}.pdf"
-                    filepath = self.download_dir / filename
-                    
-                    # Check if there's a file with ID suffix
-                    if not filepath.exists():
-                        filepath_with_id = self.download_dir / f"{clean_title}_{paper.id}.pdf"
-                        if filepath_with_id.exists():
-                            filename = f"{clean_title}_{paper.id}.pdf"
-                    
-                    f.write(f"- **File**: {filename}\n\n")
-            
-            self.log_info(f"Summary document generated: {summary_file}")
-            
-        except Exception as e:
-            self.log_error(f"Failed to generate summary document: {e}")
-    
-    def download_paper_by_id(self, paper_id: str) -> bool:
-        """Download a single paper by paper ID
-        
-        Args:
-            paper_id: ArXiv paper ID (e.g.: 2301.00001 or 2301.00001v1)
-        
-        Returns:
-            Whether download was successful
-        """
-        try:
-            # Remove version number (if exists)
-            # ArXiv ID format: YYMM.NNNNN[vN]
-            clean_paper_id = paper_id
-            if 'v' in paper_id:
-                clean_paper_id = paper_id.split('v')[0]
-            
-            # Build search query for exact ID search
-            query = f"id:{clean_paper_id}"
-            
-            self.log_info(f"Searching paper ID: {paper_id} (cleaned: {clean_paper_id})")
-            
-            # Search papers
-            papers = self.search_papers(query=query, max_results=1)
-            
-            if not papers:
-                self.log_error(f"Paper ID not found: {paper_id} (search ID: {clean_paper_id})")
-                return False
-            
-            paper = papers[0]
-            
-            # Download paper
-            success = self.download_pdf(paper)
-            
-            if success:
-                self.log_info(f"Paper downloaded successfully: {paper.title}")
-            else:
-                self.log_error(f"Paper download failed: {paper.title}")
-            
-            return success
-            
-        except Exception as e:
-            self.log_error(f"Error occurred while downloading paper {paper_id}: {e}")
-            return False
+        # Print statistics
+        self.log_info(f"Download completed. Success: {self.stats.successful_downloads}, "
+                     f"Failed: {self.stats.failed_downloads}, "
+                     f"Success rate: {self.stats.success_rate:.1f}%")
     
     def _paper_to_dict(self, paper: Paper) -> Dict[str, Any]:
-        """Convert Paper object to dictionary"""
+        """Convert Paper object to dictionary for caching
+        
+        Args:
+            paper: Paper object
+        
+        Returns:
+            Dictionary representation
+        """
         return {
             'id': paper.id,
             'title': paper.title,
             'authors': paper.authors,
             'abstract': paper.abstract,
-            'pdf_url': paper.pdf_url,
+            'categories': paper.categories,
             'published': paper.published,
-            'categories': paper.categories
+            'pdf_url': paper.pdf_url
         }
-
-def main():
-    """Main function"""
-    parser = argparse.ArgumentParser(description='ArXiv AI Paper Downloader - Refactored Version')
-    parser.add_argument('--query', default=Config.DEFAULT_QUERY, help=f'Search query (default: {Config.DEFAULT_QUERY})')
-    parser.add_argument('--date-from', help='Start date (YYYY-MM-DD)')
-    parser.add_argument('--date-to', help='End date (YYYY-MM-DD)')
-    parser.add_argument('--max-results', type=int, default=Config.DEFAULT_MAX_RESULTS, 
-                       help=f'Maximum number of results (default: {Config.DEFAULT_MAX_RESULTS})')
-    parser.add_argument('--download-dir', default=Config.DEFAULT_DOWNLOAD_DIR, help='Download directory')
-    parser.add_argument('--today', action='store_true', help='Download today\'s papers')
-    parser.add_argument('--yesterday', action='store_true', help='Download yesterday\'s papers')
-    parser.add_argument('--last-week', action='store_true', help='Download papers from the last week')
-    parser.add_argument('--clear-cache', action='store_true', help='Clear expired cache')
-    parser.add_argument('--cache-stats', action='store_true', help='Show cache statistics')
-    
-    args = parser.parse_args()
-    
-    try:
-        # Create downloader instance
-        downloader = ArxivDownloader(args.download_dir)
-        
-        # Handle cache-related commands
-        if args.clear_cache:
-            downloader.cache_manager.clear_expired_cache()
-            return
-        
-        if args.cache_stats:
-            stats = downloader.cache_manager.get_cache_stats()
-            print(f"Cache statistics: {stats['paper_cache_count']} paper caches, {stats['search_cache_count']} search caches")
-            return
-        
-        # Handle shortcut date options
-        if args.today:
-            today = datetime.now().strftime('%Y-%m-%d')
-            args.date_from = today
-            args.date_to = today
-        elif args.yesterday:
-            yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-            args.date_from = yesterday
-            args.date_to = yesterday
-        elif args.last_week:
-            today = datetime.now()
-            week_ago = today - timedelta(days=7)
-            args.date_from = week_ago.strftime('%Y-%m-%d')
-            args.date_to = today.strftime('%Y-%m-%d')
-        
-        # Search papers
-        papers = downloader.search_papers(
-            query=args.query,
-            date_from=args.date_from,
-            date_to=args.date_to,
-            max_results=args.max_results
-        )
-        
-        if papers:
-            # Download papers
-            downloader.download_papers(papers)
-            
-            # Generate summary
-            downloader.generate_summary(papers)
-        else:
-            downloader.log_info("No papers found matching the criteria")
-    
-    except (ValidationError, NetworkError, ParseError, FileOperationError) as e:
-        print(f"Error: {e}")
-        return 1
-    except KeyboardInterrupt:
-        print("\nUser interrupted download")
-        return 1
-    except Exception as e:
-        print(f"Unknown error: {e}")
-        return 1
-    
-    return 0
-
-def cli_main():
-    """CLI entry point"""
-    from cli import main as cli_main_func
-    cli_main_func()
-
-if __name__ == "__main__":
-    # If running this file directly, use the original main function
-    # To use CLI, run: python -m cli
-    exit(main())

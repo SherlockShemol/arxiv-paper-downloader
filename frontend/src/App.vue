@@ -59,6 +59,7 @@
 
 <script setup>
 import { onMounted } from 'vue'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import { useAppStore } from './stores/index'
 import SearchForm from './components/SearchForm.vue'
 import SearchResultsList from './components/SearchResultsList.vue'
@@ -73,9 +74,18 @@ function handleSearch(params) {
   appStore.searchPapers(params)
 }
 
-function handleDownload(paper) {
-  appStore.downloadPaper(paper)
+async function handleDownload(paper) {
+  try {
+    const downloadPath = './arxiv_papers'
+    await appStore.downloadPaper(paper, downloadPath)
+    ElMessage.success(`Starting download: ${paper.title}`)
+  } catch (error) {
+    ElMessage.error('Download failed')
+    console.error('Download error:', error)
+  }
 }
+
+
 
 function handleRefreshDownloads() {
   appStore.loadDownloads()

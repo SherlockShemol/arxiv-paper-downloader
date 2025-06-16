@@ -1,4 +1,7 @@
 # Python
+# ArXiv papers download directory
+arxiv_papers/
+
 __pycache__/
 *.py[cod]
 *$py.class

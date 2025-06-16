@@ -83,7 +83,7 @@ class TestEnhancedConfig(unittest.TestCase):
         # Test cache and log directories
         cache_dir = EnhancedConfig.get_cache_dir('/tmp/test')
         log_dir = EnhancedConfig.get_log_dir('/tmp/test')
-        self.assertEqual(cache_dir, Path('/tmp/test/.cache'))
+        self.assertEqual(cache_dir, Path('arxiv_papers/.cache'))
         self.assertEqual(log_dir, Path('/tmp/test/logs'))
 
 class TestAPIValidator(unittest.TestCase):

@@ -42,8 +42,7 @@ class Config:
     @classmethod
     def get_cache_dir(cls, download_dir=None):
         """Get cache directory"""
-        base_dir = cls.get_download_dir(download_dir)
-        return base_dir / '.cache'
+        return Path('./arxiv_papers/.cache')
     
     @classmethod
     def get_log_dir(cls, download_dir=None):

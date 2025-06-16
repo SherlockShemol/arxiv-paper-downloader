@@ -1,5 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 import App from './App.vue'
 
 console.log('=== Vue App Initialization with Pinia ===')
@@ -11,22 +13,25 @@ try {
   console.log('2. Creating Pinia instance')
   const pinia = createPinia()
   
-  console.log('3. Installing Pinia')
+  console.log('3. Installing ElementPlus')
+  app.use(ElementPlus)
+  
+  console.log('4. Installing Pinia')
   app.use(pinia)
   
-  console.log('4. Mounting app to #app')
+  console.log('5. Mounting app to #app')
   app.mount('#app')
   
-  console.log('5. Vue app mounted successfully')
+  console.log('6. Vue app mounted successfully')
   
   // Remove loading element
-  console.log('6. Removing loading element')
+  console.log('7. Removing loading element')
   const loading = document.getElementById('loading')
   if (loading) {
     loading.remove()
-    console.log('7. Loading element removed')
+    console.log('8. Loading element removed')
   } else {
-    console.log('7. Loading element not found')
+    console.log('8. Loading element not found')
   }
   
   console.log('=== Vue App Initialization Complete ===')

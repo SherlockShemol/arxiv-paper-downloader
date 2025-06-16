@@ -273,7 +273,7 @@ class TestConfig:
         """Test get cache directory"""
         cache_dir = Config.get_cache_dir()
         assert isinstance(cache_dir, Path)
-        assert cache_dir.name == '.cache'
+        assert str(cache_dir) == 'arxiv_papers/.cache'
     
     def test_get_log_dir(self):
         """Test get log directory"""

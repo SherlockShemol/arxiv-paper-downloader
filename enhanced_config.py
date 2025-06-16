@@ -85,8 +85,7 @@ class EnhancedConfig:
         Returns:
             Path object for cache directory
         """
-        base_dir = cls.get_download_dir(download_dir)
-        return base_dir / '.cache'
+        return Path('./arxiv_papers/.cache')
     
     @classmethod
     def get_log_dir(cls, download_dir: Optional[str] = None) -> Path:

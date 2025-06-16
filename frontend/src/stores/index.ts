@@ -117,10 +117,14 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  const downloadPaper = async (paper: Paper): Promise<void> => {
+  const downloadPaper = async (paper: Paper, downloadPath?: string): Promise<void> => {
     loading.value.download = true
     try {
-      const response = await api.downloadPaper(paper.id)
+      const response = await api.downloadPaper({ 
+        id: paper.id, 
+        title: paper.title,
+        download_path: downloadPath
+      })
       if (response.success && response.data) {
         // Add to downloads list
         const downloadItem: DownloadItem = {
