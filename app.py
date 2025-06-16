@@ -417,7 +417,7 @@ def get_settings():
     """Get system settings"""
     try:
         settings = {
-            'default_download_path': str(Path.home() / 'Downloads' / 'ArXiv_Papers'),
+            'default_download_path': str(Path('./arxiv_papers')),
             'max_results': 50,
             'timeout': 30,
             'retry_count': 3

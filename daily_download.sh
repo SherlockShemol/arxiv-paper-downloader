@@ -59,4 +59,4 @@ esac
 
 echo
 echo "Download completed!"
-echo "File location: ~/Downloads/arxiv_papers"
+echo "File location: ./arxiv_papers"

@@ -453,7 +453,7 @@ const aboutDialogVisible = ref(false)
 
 // Download settings
 const downloadSettings = reactive({
-  downloadDir: '/Users/username/Downloads/arxiv_papers',
+  downloadDir: './arxiv_papers',
   maxConcurrent: 3,
   retryCount: 3,
   timeout: 30,
@@ -550,7 +550,7 @@ const resetToDefaults = async () => {
     
     // Reset all settings to default values
     Object.assign(downloadSettings, {
-      downloadDir: '/Users/username/Downloads/arxiv_papers',
+      downloadDir: './arxiv_papers',
       maxConcurrent: 3,
       retryCount: 3,
       timeout: 30,

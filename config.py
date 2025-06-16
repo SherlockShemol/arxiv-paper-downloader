@@ -6,7 +6,7 @@ class Config:
     """Application configuration class"""
     
     # Default configuration
-    DEFAULT_DOWNLOAD_DIR = "~/Downloads/arxiv_papers"
+    DEFAULT_DOWNLOAD_DIR = "./arxiv_papers"
     DEFAULT_QUERY = "cat:cs.AI"
     DEFAULT_MAX_RESULTS = 10
     

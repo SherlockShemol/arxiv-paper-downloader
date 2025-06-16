@@ -12,7 +12,7 @@ def move_papers_to_directory():
     """Find and move downloaded papers to target directory"""
     
     # Target directory
-    target_dir = Path.home() / "Downloads" / "arxiv_papers"
+    target_dir = Path('./arxiv_papers')
     
     # Possible source directories (MCP server usually stores files in these locations)
     possible_source_dirs = [
