@@ -30,6 +30,11 @@ A powerful ArXiv paper search and download tool that provides **Web Interface**,
 - 📈 **Performance Optimization**: Memory and network optimization
 - 🔧 **Configuration Management**: Flexible configuration system
 - 🌐 **RESTful API**: Complete backend API interface
+- 🚀 **Enhanced ArXiv API**: Advanced search capabilities with structured queries, multi-field search, and date range filtering
+- 🔍 **Structured Search**: Support for field-specific searches (title, author, abstract, categories)
+- 📅 **Date Range Queries**: Flexible date filtering for recent papers or specific time periods
+- 🏷️ **Category Filtering**: Filter papers by arXiv categories (cs.AI, cs.LG, etc.)
+- 🔄 **Backward Compatibility**: Seamless integration with existing codebase
 
 ## 🛠️ Quick Start
 
@@ -78,16 +83,74 @@ python cli.py --query "deep learning" --async --max-concurrent 5
 
 ```python
 from arxiv_downloader import ArxivDownloader
+from enhanced_arxiv_api import EnhancedArxivAPI, SearchQuery, SearchField, DateRange
+from datetime import datetime, timedelta
 
-# Create downloader instance
+# Basic usage with original API
 downloader = ArxivDownloader(download_dir="./papers")
-
-# Search and download papers
 papers = downloader.search_papers("machine learning", max_results=10)
 downloader.download_papers(papers)
+
+# Enhanced API usage
+with EnhancedArxivAPI() as api:
+    # Basic search
+    papers = api.search_papers(query="deep learning", max_results=10)
+    
+    # Structured search with field-specific queries
+    query = SearchQuery(terms=["transformer"], field=SearchField.TITLE)
+    papers = api.search_papers(query=query, max_results=5)
+    
+    # Date range filtering
+    date_range = DateRange(
+        start_date=(datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d"),
+        end_date=datetime.now().strftime("%Y-%m-%d")
+    )
+    papers = api.search_papers(
+        query="neural networks",
+        date_range=date_range,
+        categories=["cs.AI", "cs.LG"]
+    )
 ```
 
 ## 📖 Detailed Usage Guide
+
+### 🚀 Enhanced ArXiv API Features
+
+#### Advanced Search Capabilities
+- **🔍 Structured Queries**: Use `SearchQuery` objects for precise field-specific searches
+- **📝 Multi-field Search**: Search across title, author, abstract, categories, and more
+- **📅 Date Range Filtering**: Filter papers by submission or update date ranges
+- **🏷️ Category Filtering**: Filter by single or multiple arXiv categories
+- **🔄 Flexible Sorting**: Sort by relevance, submission date, or update date
+- **📋 Batch ID Queries**: Retrieve multiple papers by arXiv ID list
+- **⚡ Auto-retry**: Built-in retry mechanism with exponential backoff
+- **🛡️ Error Handling**: Comprehensive error classification and handling
+
+#### Enhanced API Examples
+
+```python
+from enhanced_arxiv_api import (
+    EnhancedArxivAPI, SearchQuery, SearchField, 
+    DateRange, SortBy, SortOrder
+)
+
+# Multi-field combination search
+queries = [
+    SearchQuery(terms=["neural"], field=SearchField.TITLE),
+    SearchQuery(terms=["attention"], field=SearchField.ABSTRACT)
+]
+papers = api.search_papers(
+    query=queries,
+    categories=["cs.AI", "cs.LG"],
+    sort_by=SortBy.SUBMITTED_DATE,
+    sort_order=SortOrder.DESCENDING
+)
+
+# Convenience functions for common searches
+papers = api.search_by_author("Yoshua Bengio", max_results=20)
+papers = api.search_recent_papers("computer vision", days=7)
+papers = api.search_by_category("cs.CV", max_results=50)
+```
 
 ### 🌐 Web Interface Features
 
@@ -98,6 +161,7 @@ downloader.download_papers(papers)
 - **📈 Download History**: View all download records including status and progress
 - **🎯 Keyword Recommendations**: Smart keyword recommendations based on search history
 - **📱 Responsive Design**: Perfect adaptation for various device screens
+- **🚀 Enhanced Search**: Leverage enhanced API features through the web interface
 
 #### Usage Steps
 1. Enter keywords in the search box (e.g., "machine learning", "transformer", etc.)

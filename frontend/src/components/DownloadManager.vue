@@ -300,14 +300,14 @@ const getStatusText = (status: string): string => {
 
 const getEmptyStateTitle = (): string => {
   if (statusFilter.value === 'all') {
-    return 'No download records'
+    return 'No downloads yet'
   }
   return `No ${statusFilter.value} downloads`
 }
 
 const getEmptyStateDescription = (): string => {
   if (statusFilter.value === 'all') {
-    return 'Your downloaded papers will appear here'
+    return 'Papers you download will be tracked and managed here'
   }
   return `No downloads with ${statusFilter.value} status found`
 }

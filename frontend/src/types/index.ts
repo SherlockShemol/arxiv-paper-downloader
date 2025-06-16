@@ -31,10 +31,28 @@ export interface PaperLink {
 // Search Types
 export interface SearchParams {
   query: string
-  max_results: number
+  max_results?: number
   date_from?: string
   date_to?: string
+  search_field?: string
+  sort_by?: string
+  sort_order?: string
+  id_list?: string[]
+  enhanced?: boolean
   categories?: string[]
+}
+
+// Enhanced search query structure
+export interface SearchQuery {
+  terms: string[]
+  field?: 'title' | 'author' | 'abstract' | 'comment' | 'journal_ref' | 'category' | 'all'
+  operator?: 'AND' | 'OR' | 'ANDNOT'
+}
+
+// Date range for enhanced searches
+export interface DateRange {
+  start_date?: string
+  end_date?: string
 }
 
 export interface SearchResponse {

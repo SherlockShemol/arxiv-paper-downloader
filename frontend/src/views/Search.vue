@@ -91,6 +91,8 @@
           </el-col>
         </el-row>
         
+
+        
         <el-form-item>
           <el-button type="primary" @click="handleSearch" :loading="searching">
             <el-icon><Search /></el-icon>
@@ -109,7 +111,7 @@
     </el-card>
 
     <!-- Search results -->
-    <el-card v-if="searchResults.length > 0 || searching" class="results-card" shadow="hover">
+    <el-card v-if="hasSearched || searching" class="results-card" shadow="hover">
       <template #header>
         <div class="card-header">
           <el-icon><List /></el-icon>
@@ -132,8 +134,13 @@
         <el-skeleton :rows="5" animated />
       </div>
       
+      <!-- No results state -->
+      <div v-else-if="hasSearched && searchResults.length === 0" class="no-results">
+        <el-empty description="No papers found. Try adjusting your search criteria." />
+      </div>
+      
       <!-- List view -->
-      <div v-else-if="viewMode === 'list'" class="list-view">
+      <div v-else-if="viewMode === 'list' && searchResults.length > 0" class="list-view">
         <el-table
           :data="searchResults"
           @selection-change="handleSelectionChange"
@@ -191,7 +198,7 @@
       </div>
       
       <!-- Grid view -->
-      <div v-else class="grid-view">
+      <div v-else-if="viewMode === 'grid' && searchResults.length > 0" class="grid-view">
         <el-row :gutter="20">
           <el-col :span="8" v-for="paper in searchResults" :key="paper.id">
             <el-card class="paper-card" shadow="hover" @click="selectPaper(paper)">
@@ -301,6 +308,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import dayjs from 'dayjs'
+import api from '@/api'
 
 // Form data
 const searchForm = reactive({
@@ -332,35 +340,39 @@ const pageSize = ref(20)
 const totalResults = ref(0)
 const detailDialogVisible = ref(false)
 const selectedPaper = ref(null)
+const hasSearched = ref(false)
 
 // Search papers
 const handleSearch = async () => {
   try {
     await searchFormRef.value.validate()
     searching.value = true
+    hasSearched.value = true
     
     // Prepare search parameters
     const searchParams = {
       query: searchForm.query,
       max_results: searchForm.maxResults,
       date_from: searchForm.dateFrom || undefined,
-      date_to: searchForm.dateTo || undefined
+      date_to: searchForm.dateTo || undefined,
+      sort_by: searchForm.sortBy,
+      categories: searchForm.category ? [searchForm.category] : undefined
     }
     
-    // Call real API
-    const response = await fetch('http://localhost:5001/api/search', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(searchParams)
-    })
+    // Use enhanced API through api module
+    console.log('Calling API with params:', searchParams)
+    const result = await api.searchPapersEnhanced(searchParams)
+    console.log('API result:', result)
+    console.log('API result type:', typeof result)
+    console.log('API result.success:', result?.success)
+    console.log('API result.data:', result?.data)
+    console.log('API result.data.papers:', result?.data?.papers)
     
-    const data = await response.json()
-    
-    if (data.success && data.papers) {
+    if (result && result.success && result.data && result.data.papers) {
+      const data = result.data
+      console.log('Processing papers data:', data.papers)
       // Transform API response to match frontend format
-      searchResults.value = data.papers.map(paper => ({
+      const transformedPapers = data.papers.map(paper => ({
         id: paper.id,
         title: paper.title,
         authors: paper.authors,
@@ -375,12 +387,20 @@ const handleSearch = async () => {
         downloading: false,
         selected: false
       }))
+      
+      console.log('Transformed papers:', transformedPapers)
+      searchResults.value = transformedPapers
       totalResults.value = data.total || searchResults.value.length
-      ElMessage.success(`Found ${searchResults.value.length} related papers`)
+      console.log('Updated searchResults.value:', searchResults.value)
+      console.log('Updated totalResults.value:', totalResults.value)
+      
+      ElMessage.success(`Search found ${searchResults.value.length} related papers`)
     } else {
+      console.log('API call failed or no papers found')
+      console.log('Setting empty results')
       searchResults.value = []
       totalResults.value = 0
-      ElMessage.error(data.error || 'Search failed')
+      ElMessage.error(result?.error || 'Search failed')
     }
     
   } catch (error) {

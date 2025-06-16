@@ -83,21 +83,37 @@ export const useAppStore = defineStore('app', () => {
 
   const searchPapers = async (params: SearchParams): Promise<void> => {
     loading.value.search = true
+    console.log('Store: Starting search with params:', params)
     try {
-      const response = await api.searchPapers(params)
-      console.log('Search response:', response) // Debug log
+      const response = await api.searchPapersEnhanced(params)
+      console.log('Store: Search response:', response)
+      console.log('Store: Response success:', response.success)
+      console.log('Store: Response data:', response.data)
+      console.log('Store: Response data type:', typeof response.data)
+      
       if (response.success && response.data) {
+        console.log('Store: Success path - processing data')
+        console.log('Store: response.data.papers:', response.data.papers)
+        console.log('Store: response.data.papers type:', typeof response.data.papers)
+        console.log('Store: response.data.papers length:', response.data.papers?.length)
+        
         // Backend returns papers directly in response.data, not response.data.papers
-        searchResults.value = response.data.papers || response.data || []
+        const papers = response.data.papers || response.data || []
+        console.log('Store: Final papers array:', papers)
+        console.log('Store: Final papers length:', papers.length)
+        searchResults.value = papers
+        console.log('Store: Updated searchResults.value:', searchResults.value)
       } else {
-        console.error('Search failed:', response.error)
+        console.error('Store: Search failed - error path')
+        console.error('Store: Response error:', response.error)
         searchResults.value = []
       }
     } catch (error) {
-      console.error('Search failed:', error)
+      console.error('Store: Search failed - exception:', error)
       searchResults.value = []
     } finally {
       loading.value.search = false
+      console.log('Store: Search completed, final searchResults.value:', searchResults.value)
     }
   }
 

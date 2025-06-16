@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Module Test</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>API Module Test</h1>
+    <button onclick="testApiModule()">Test API Module</button>
+    <div id="result"></div>
+
+    <script>
+        // Simulate the API module
+        const apiClient = axios.create({
+            baseURL: 'http://localhost:5002/api',
+            timeout: 30000,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        const api = {
+            async searchPapersEnhanced(params) {
+                try {
+                    const response = await apiClient.post('/search/enhanced', params);
+                    console.log('Raw response:', response);
+                    console.log('Response data:', response.data);
+                    return {
+                        success: response.data.success || true,
+                        data: response.data,
+                    };
+                } catch (error) {
+                    console.error('API Error:', error);
+                    return {
+                        success: false,
+                        error: error.message || 'Enhanced search failed',
+                    };
+                }
+            }
+        };
+
+        async function testApiModule() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const searchParams = {
+                    query: 'machine learning',
+                    max_results: 5
+                };
+                
+                console.log('Calling API with params:', searchParams);
+                const result = await api.searchPapersEnhanced(searchParams);
+                
+                console.log('API Result:', result);
+                
+                if (result.success && result.data.papers) {
+                    const data = result.data;
+                    resultDiv.innerHTML = `
+                        <h3>Success!</h3>
+                        <p>Found ${data.papers.length} papers</p>
+                        <p>Total: ${data.total}</p>
+                        <p>Enhanced: ${data.enhanced}</p>
+                        <pre>${JSON.stringify(data.papers[0], null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3>Failed!</h3>
+                        <p>Error: ${result.error}</p>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                console.error('Test failed:', error);
+                resultDiv.innerHTML = `
+                    <h3>Exception!</h3>
+                    <p>Error: ${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

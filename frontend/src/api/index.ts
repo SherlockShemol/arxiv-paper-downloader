@@ -138,20 +138,50 @@ export const api = {
     }
   },
 
-  // Search papers
-  async searchPapers(params: SearchParams): Promise<ApiResponse<SearchResponse>> {
+  // Legacy search function - removed, use searchPapersEnhanced instead
+
+  // Enhanced search with advanced features
+  async searchPapersEnhanced(params: SearchParams): Promise<ApiResponse<SearchResponse>> {
     try {
-      const response = await apiClient.post('/search', params)
-      console.log('Raw API response:', response) // Debug log
-      // Backend returns the data directly, not wrapped in another data property
-      return {
-        success: response.success || true,
-        data: response, // Use response directly since backend returns {success, papers, total}
+      console.log('API module: Making request to /search/enhanced with params:', params)
+      const responseData = await apiClient.post('/search/enhanced', params)
+      console.log('API module: Raw response data:', responseData)
+      console.log('API module: Response data type:', typeof responseData)
+      console.log('API module: Response data success:', responseData?.success)
+      console.log('API module: Response data papers:', responseData?.papers)
+      console.log('API module: Response data total:', responseData?.total)
+      
+      // Handle the response structure from backend
+      // Note: responseData is already the parsed JSON from backend due to response interceptor
+      // Backend returns: {success: true, data: {papers: [...], total: 10, enhanced: true}}
+      if (responseData && responseData.success && responseData.data) {
+        console.log('API module: Success path - returning papers:', responseData.data.papers)
+        return {
+          success: true,
+          data: {
+            papers: responseData.data.papers || [],
+            total: responseData.data.total || 0,
+            enhanced: responseData.data.enhanced || false
+          },
+        }
+      } else {
+        console.log('API module: Error path - responseData:', responseData)
+        return {
+          success: false,
+          error: responseData?.error || 'Search failed',
+        }
       }
     } catch (error) {
+      console.error('API module: Request failed:', error)
+      console.error('API module: Error details:', {
+        message: (error as any).message,
+        response: (error as any).response,
+        status: (error as any).response?.status,
+        data: (error as any).response?.data
+      })
       return {
         success: false,
-        error: (error as any).error || 'Search failed',
+        error: (error as any).message || 'Enhanced search failed',
       }
     }
   },

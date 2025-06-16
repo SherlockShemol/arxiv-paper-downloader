@@ -51,28 +51,79 @@
         
         <!-- Advanced filters -->
         <div class="advanced-filters">
-          <div class="filter-group">
-            <label class="filter-label">
-              <svg class="filter-icon" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z" />
-              </svg>
-              Date Range
-            </label>
-            <div class="date-inputs">
-              <input 
-                v-model="dateFrom" 
-                type="date" 
-                class="date-input"
-                title="Start Date"
-              />
-              <span class="date-separator">to</span>
-              <input 
-                v-model="dateTo" 
-                type="date" 
-                class="date-input"
-                title="End Date"
-              />
+          <div class="filter-row">
+            <div class="filter-group">
+              <label class="filter-label">
+                <svg class="filter-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z" />
+                </svg>
+                Date Range
+              </label>
+              <div class="date-inputs">
+                <input 
+                  v-model="dateFrom" 
+                  type="date" 
+                  class="date-input"
+                  title="Start Date"
+                />
+                <span class="date-separator">to</span>
+                <input 
+                  v-model="dateTo" 
+                  type="date" 
+                  class="date-input"
+                  title="End Date"
+                />
+              </div>
             </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">
+                <svg class="filter-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z" />
+                </svg>
+                Search Field
+              </label>
+              <select v-model="searchField" class="select-input">
+                <option value="all">All Fields</option>
+                <option value="title">Title</option>
+                <option value="author">Author</option>
+                <option value="abstract">Abstract</option>
+                <option value="category">Category</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="filter-row">
+            <div class="filter-group">
+              <label class="filter-label">
+                <svg class="filter-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z" />
+                </svg>
+                Sort By
+              </label>
+              <select v-model="sortBy" class="select-input">
+                <option value="relevance">Relevance</option>
+                <option value="lastUpdatedDate">Last Updated</option>
+                <option value="submittedDate">Submitted Date</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label class="filter-label">
+                <svg class="filter-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z" />
+                </svg>
+                Sort Order
+              </label>
+              <select v-model="sortOrder" class="select-input">
+                <option value="descending">Descending</option>
+                <option value="ascending">Ascending</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="filter-row">
+
           </div>
         </div>
       </div>
@@ -129,6 +180,10 @@ const searchQuery = ref('')
 const maxResults = ref(10)
 const dateFrom = ref('')
 const dateTo = ref('')
+const searchField = ref('all')
+const sortBy = ref('relevance')
+const sortOrder = ref('descending')
+
 const recommendedKeywords = ref<string[]>([])
 
 // Methods
@@ -149,6 +204,13 @@ const handleSearch = () => {
   if (dateTo.value) {
     params.date_to = dateTo.value
   }
+  
+  // Add enhanced search parameters (always enabled)
+  if (searchField.value !== 'all') {
+    params.search_field = searchField.value
+  }
+  params.sort_by = sortBy.value
+  params.sort_order = sortOrder.value
   
   emit('search', params)
 }
@@ -196,7 +258,7 @@ onMounted(() => {
   gap: 0.75rem;
   font-size: 2.25rem;
   font-weight: 700;
-  color: white;
+  color: #2c3e50;
   margin-bottom: 0.75rem;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   letter-spacing: -0.025em;
@@ -209,7 +271,7 @@ onMounted(() => {
 }
 
 .section-description {
-  color: rgba(255, 255, 255, 0.95);
+  color: #5a6c7d;
   font-size: 1.125rem;
   font-weight: 400;
   line-height: 1.6;
@@ -228,6 +290,7 @@ onMounted(() => {
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #2c3e50;
 }
 
 .search-card::before {
@@ -432,6 +495,21 @@ onMounted(() => {
   padding-top: 1.5rem;
 }
 
+.filter-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-row:last-child {
+  margin-bottom: 0;
+}
+
+.filter-group.full-width {
+  flex: 1 1 100%;
+}
+
 .filter-group {
   display: flex;
   align-items: center;
@@ -463,6 +541,46 @@ onMounted(() => {
 .date-input {
   padding: 0.75rem;
   width: 150px;
+}
+
+.select-input {
+  padding: 0.75rem;
+  background: white;
+  color: #2c3e50;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.select-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.select-input option {
+  background: white;
+  color: #2c3e50;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.checkbox-input {
+  width: 18px;
+  height: 18px;
+  accent-color: #3b82f6;
+}
+
+.checkbox-label {
+  color: #2c3e50;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
 }
 
 .date-separator {

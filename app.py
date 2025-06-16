@@ -23,6 +23,21 @@ from utils import sanitize_filename, ensure_directory
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
 
+@app.route('/')
+def index():
+    """Root endpoint"""
+    return jsonify({
+        'message': 'ArXiv Paper Downloader API',
+        'version': '1.0.0',
+        'status': 'running',
+        'endpoints': {
+            'search': '/api/search',
+            'enhanced_search': '/api/search/enhanced',
+            'download': '/api/papers/download',
+            'downloads': '/api/downloads'
+        }
+    })
+
 class DownloadManager(LoggerMixin):
     """Download Manager"""
     
@@ -194,6 +209,126 @@ def search_papers():
         app.logger.error(f"Paper search failed: {str(e)}")
         return jsonify({'error': f'Search failed: {str(e)}'}), 500
 
+@app.route('/api/search/enhanced', methods=['POST'])
+def enhanced_search_papers():
+    """Enhanced paper search with advanced filtering"""
+    try:
+        # Log request details
+        app.logger.info(f"Request content type: {request.content_type}")
+        app.logger.info(f"Request headers: {dict(request.headers)}")
+        app.logger.info(f"Request data: {request.get_data()}")
+        
+        # Check content type
+        if request.content_type != 'application/json':
+            app.logger.warning(f"Invalid content type: {request.content_type}")
+            return jsonify({'error': 'Content-Type must be application/json'}), 400
+            
+        data = request.get_json(force=True) or {}
+        
+        # Extract enhanced search parameters
+        query = data.get('query', '')
+        max_results = int(data.get('max_results', 10))
+        categories = data.get('categories', [])
+        search_field = data.get('search_field', 'all')
+        sort_by = data.get('sort_by', 'relevance')
+        sort_order = data.get('sort_order', 'descending')
+        id_list = data.get('id_list', [])
+        date_from = data.get('date_from')
+        date_to = data.get('date_to')
+        
+        if not query.strip() and not id_list:
+            return jsonify({'error': 'Search query or ID list cannot be empty'}), 400
+        
+        # Create enhanced API instance
+        from enhanced_arxiv_api import EnhancedArxivAPI, SearchQuery, SearchField, DateRange, SortBy, SortOrder
+        
+        with EnhancedArxivAPI() as api:
+            # Handle structured query if search_field is specified
+            if search_field and search_field != 'all':
+                # Map frontend field names to SearchField enum
+                field_mapping = {
+                    'title': SearchField.TITLE,
+                    'author': SearchField.AUTHOR,
+                    'abstract': SearchField.ABSTRACT,
+                    'comment': SearchField.COMMENT,
+                    'journal_ref': SearchField.JOURNAL_REF,
+                    'category': SearchField.CATEGORY
+                }
+                
+                if search_field in field_mapping:
+                    search_query = SearchQuery(
+                        terms=query.split(),
+                        field=field_mapping[search_field]
+                    )
+                else:
+                    search_query = query
+            else:
+                search_query = query
+            
+            # Handle date range
+            date_range = None
+            if date_from or date_to:
+                date_range = DateRange(
+                    start_date=date_from,
+                    end_date=date_to
+                )
+            
+            # Map sort parameters
+            sort_by_mapping = {
+                'relevance': SortBy.RELEVANCE,
+                'lastUpdatedDate': SortBy.LAST_UPDATED_DATE,
+                'submittedDate': SortBy.SUBMITTED_DATE
+            }
+            
+            sort_order_mapping = {
+                'ascending': SortOrder.ASCENDING,
+                'descending': SortOrder.DESCENDING
+            }
+            
+            # Perform enhanced search
+            papers = api.search_papers(
+                query=search_query,
+                id_list=id_list if id_list else None,
+                date_range=date_range,
+                categories=categories if categories else None,
+                max_results=max_results,
+                sort_by=sort_by_mapping.get(sort_by, SortBy.RELEVANCE),
+                sort_order=sort_order_mapping.get(sort_order, SortOrder.DESCENDING)
+            )
+            
+            # Convert to dictionary format
+            papers_data = []
+            for paper in papers:
+                paper_dict = {
+                    'id': paper.id,
+                    'title': paper.title,
+                    'authors': paper.authors,
+                    'summary': paper.abstract,
+                    'abstract': paper.abstract,
+                    'published': paper.published if isinstance(paper.published, str) else paper.published,
+                    'updated': getattr(paper, 'updated', None),
+                    'categories': paper.categories,
+                    'pdf_url': paper.pdf_url,
+                    'arxiv_url': f"https://arxiv.org/abs/{paper.id}",
+                    'downloading': False
+                }
+                papers_data.append(paper_dict)
+            
+            response_data = {
+                'success': True,
+                'data': {
+                    'papers': papers_data,
+                    'total': len(papers_data),
+                    'enhanced': True
+                }
+            }
+            app.logger.info(f"Returning response: {response_data}")
+            return jsonify(response_data)
+            
+    except Exception as e:
+        app.logger.error(f"Enhanced paper search failed: {str(e)}")
+        return jsonify({'error': f'Enhanced search failed: {str(e)}'}), 500
+
 @app.route('/api/papers/download', methods=['POST'])
 def download_paper():
     """Download paper"""
@@ -343,6 +478,7 @@ def api_info():
         'endpoints': {
             'health': '/api/health',
             'search': '/api/papers/search',
+            'enhanced_search': '/api/search/enhanced',
             'download': '/api/papers/download',
             'downloads': '/api/downloads',
             'download_status': '/api/downloads/<download_id>/status',
@@ -366,7 +502,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     
     print("Starting ArXiv Paper Downloader Web API...")
-    print("API URL: http://localhost:5002")
+    print("API URL: http://localhost:5001")
     print("Frontend URL: http://localhost:3000")
     
-    app.run(host='0.0.0.0', port=5002, debug=False)
+    app.run(host='0.0.0.0', port=5001, debug=False)

@@ -84,10 +84,12 @@ class DateRange:
             return ""
         
         # Convert YYYY-MM-DD to YYYYMMDD format
-        start = self.start_date.replace('-', '') + '0000' if self.start_date else '*'
-        end = self.end_date.replace('-', '') + '2359' if self.end_date else '*'
+        # ArXiv API range format: submittedDate:[20241201 TO 20241203]
+        # Note: Wildcards don't work in ranges, and use spaces not plus signs
+        start = self.start_date.replace('-', '') if self.start_date else '*'
+        end = self.end_date.replace('-', '') if self.end_date else '*'
         
-        return f"{self.field.value}:[{start}+TO+{end}]"
+        return f"{self.field.value}:[{start} TO {end}]"
 
 
 class EnhancedArxivAPI(LoggerMixin):

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .search-form {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .results {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .paper {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .paper:last-child {
+            border-bottom: none;
+        }
+        .paper-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .paper-authors {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .paper-abstract {
+            color: #333;
+            line-height: 1.4;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+        }
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Search Test</h1>
+    
+    <div class="search-form">
+        <input type="text" id="searchQuery" placeholder="Enter search query" value="machine learning">
+        <button onclick="testSearch()">Search</button>
+        <button onclick="testDirectAPI()">Test Direct API</button>
+    </div>
+    
+    <div id="debugInfo" class="debug-info"></div>
+    
+    <div class="results">
+        <h2>Search Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            console.log(message);
+        }
+
+        async function testDirectAPI() {
+            log('Testing direct API call...');
+            try {
+                const response = await fetch('http://localhost:5000/api/search/enhanced', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: document.getElementById('searchQuery').value,
+                        max_results: 10
+                    })
+                });
+                
+                log('Response status: ' + response.status);
+                const data = await response.json();
+                log('Response data: ' + JSON.stringify(data, null, 2));
+                
+                if (data.success && data.data && data.data.papers) {
+                    displayResults(data.data.papers);
+                } else {
+                    log('No papers found or API error');
+                }
+            } catch (error) {
+                log('Direct API test failed: ' + error.message);
+            }
+        }
+
+        async function testSearch() {
+            log('Testing search with API module...');
+            try {
+                // Simulate the API module call
+                const searchParams = {
+                    query: document.getElementById('searchQuery').value,
+                    max_results: 10
+                };
+                
+                log('Search params: ' + JSON.stringify(searchParams));
+                
+                const response = await fetch('http://localhost:5000/api/search/enhanced', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(searchParams)
+                });
+                
+                const result = await response.json();
+                log('API result: ' + JSON.stringify(result, null, 2));
+                
+                if (result && result.success && result.data && result.data.papers) {
+                    log('Found ' + result.data.papers.length + ' papers');
+                    displayResults(result.data.papers);
+                } else {
+                    log('Search failed or no results');
+                    document.getElementById('results').innerHTML = '<p>No results found</p>';
+                }
+            } catch (error) {
+                log('Search test failed: ' + error.message);
+            }
+        }
+
+        function displayResults(papers) {
+            const resultsDiv = document.getElementById('results');
+            if (!papers || papers.length === 0) {
+                resultsDiv.innerHTML = '<p>No papers to display</p>';
+                return;
+            }
+            
+            let html = '';
+            papers.forEach(paper => {
+                html += `
+                    <div class="paper">
+                        <div class="paper-title">${paper.title || 'No title'}</div>
+                        <div class="paper-authors">Authors: ${(paper.authors || []).join(', ') || 'No authors'}</div>
+                        <div class="paper-abstract">${(paper.abstract || paper.summary || 'No abstract').substring(0, 200)}...</div>
+                    </div>
+                `;
+            });
+            resultsDiv.innerHTML = html;
+            log('Displayed ' + papers.length + ' papers');
+        }
+
+        // Clear debug info on page load
+        document.getElementById('debugInfo').textContent = 'Debug log:\n';
+    </script>
+</body>
+</html>
